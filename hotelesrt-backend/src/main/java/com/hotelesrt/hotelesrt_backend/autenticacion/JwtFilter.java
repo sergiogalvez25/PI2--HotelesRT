@@ -1,4 +1,4 @@
-package com.hotelesrt.hotelesrt_backend;
+package com.hotelesrt.hotelesrt_backend.autenticacion;
 
 import java.io.IOException;
 

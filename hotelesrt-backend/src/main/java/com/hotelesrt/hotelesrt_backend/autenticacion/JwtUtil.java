@@ -42,7 +42,7 @@ public class JwtUtil {
     }
 
     public String extraerEmail(String token) {
-        return extraerEmail(token).getSubject();
+        return extraerClaims(token).getSubject();
     }
     public String extraerRol(String token) {
         return extraerClaims(token).get("rol", String.class);
