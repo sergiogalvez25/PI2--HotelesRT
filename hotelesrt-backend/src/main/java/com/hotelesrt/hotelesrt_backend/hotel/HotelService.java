@@ -5,8 +5,11 @@ package com.hotelesrt.hotelesrt_backend.hotel;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.jetbrains.exported.JBRApi.Service;
+import com.hotelesrt.hotelesrt_backend.hotel.central.Hotel;
+
+
 
 
 
@@ -30,7 +33,7 @@ public class HotelService{
     // buscar un hotel concreto con el id
     public Hotel obtenerHotel(Long id){
         return hotelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Hotel no encontrado con el id:" id));
+                .orElseThrow(() -> new RuntimeException("Hotel no encontrado con el id:" + id));
 
     }
     //buscar hoteles por ciudad

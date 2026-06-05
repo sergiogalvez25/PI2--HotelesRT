@@ -1,4 +1,4 @@
-package com.hotelesrt.hotelesrt_backend.hotel;
+package com.hotelesrt.hotelesrt_backend.hotel.central;
 
 import jakarta.persistence.*;
 import java.util.Objects;

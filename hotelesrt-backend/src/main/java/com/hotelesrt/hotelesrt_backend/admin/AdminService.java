@@ -8,8 +8,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 
-import com.hotelesrt.hotelesrt_backend.hotel.Habitacion;
 import com.hotelesrt.hotelesrt_backend.hotel.HabitacionRepository;
+import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
 import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporada;
 import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporadaRepository;
 import com.hotelesrt.hotelesrt_backend.reservas.Reserva;

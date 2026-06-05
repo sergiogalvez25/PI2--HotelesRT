@@ -11,12 +11,14 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import com.hotelesrt.hotelesrt_backend.hotel.DisponibilidadService;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaCanceladaEvent;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaCreadaEvent;
 
 import jakarta.transaction.Transactional;
 
 
 
-// <>
+
 
 @Service
 public class ReservaService {

@@ -7,6 +7,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
+
+import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
+import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporadaRepository;
 // <>
 @Service
 public class DisponibilidadService {
@@ -45,7 +48,7 @@ public class DisponibilidadService {
             long noches = ChronoUnit.DAYS.between(fechaEntrada,fechaSalida);
             Double precioTemporada = precioTemporadaRepository
                     .findPrecioActivoParaFechas(habitacionID, fechaEntrada, fechaSalida);
-            Double precioPorNoche;
+            Double precioPorNoche = 0.00;
             if(precioTemporada != null){
                precioPorNoche = precioTemporada;
             }else if(precioTemporada == null){

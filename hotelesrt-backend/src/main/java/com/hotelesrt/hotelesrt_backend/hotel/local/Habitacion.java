@@ -1,4 +1,6 @@
-package com.hotelesrt.hotelesrt_backend.hotel;
+package com.hotelesrt.hotelesrt_backend.hotel.local;
+import com.hotelesrt.hotelesrt_backend.hotel.TipoHabitacion;
+
 import jakarta.persistence.*;
 
 @Entity

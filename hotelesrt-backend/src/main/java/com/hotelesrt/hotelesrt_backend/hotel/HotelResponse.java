@@ -1,5 +1,7 @@
 package com.hotelesrt.hotelesrt_backend.hotel;
 
+import com.hotelesrt.hotelesrt_backend.hotel.central.Hotel;
+
 public class HotelResponse {
     private Long id;
     private String nombre;
