@@ -3,40 +3,38 @@ package com.hotelesrt.hotelesrt_backend.reservas;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
 
-
-
-
-@Entity
-@Table(name = "reservas_local")
-public class Reserva {
+public class ReservaResponse {
     
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
     private Long cliente_id;
-    @Column(nullable = false)
     private Long habitacion_id;
-    @Column(nullable = false)
+    private Long hotel_id;
     private LocalDate fechaEntrada;
-    @Column(nullable = false)
     private LocalDate fechaSalida;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private EstadoReserva estado;
-    @Column(nullable = false)
     private Double precioTotal;
-    @Column(nullable = false)
     private Integer numPersonas;
     private String peticiones;
-    @Column(nullable = false)
     private LocalDate fechaCreacion;
 
-    @Version
-    private Long version;
+    public ReservaResponse(Reserva reserva, Long hotel_id) {
+
+        this.id = reserva.getId();
+        this.cliente_id = reserva.getCliente_id();
+        this.habitacion_id = reserva.getHabitacion_id();
+        this.hotel_id = hotel_id;
+        this.fechaEntrada = reserva.getFechaEntrada();
+        this.fechaSalida = reserva.getFechaSalida();
+        this.estado = reserva.getEstado();
+        this.precioTotal = reserva.getPrecioTotal();
+        this.numPersonas = reserva.getNumPersonas();
+        this.peticiones = reserva.getPeticiones();
+        this.fechaCreacion = reserva.getFechaCreacion();
+    }
 
     public Long getId() {
         return id;
@@ -60,6 +58,14 @@ public class Reserva {
 
     public void setHabitacion_id(Long habitacion_id) {
         this.habitacion_id = habitacion_id;
+    }
+
+    public Long getHotel_id() {
+        return hotel_id;
+    }
+
+    public void setHotel_id(Long hotel_id) {
+        this.hotel_id = hotel_id;
     }
 
     public LocalDate getFechaEntrada() {
@@ -118,17 +124,5 @@ public class Reserva {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-
-
-
-
-
+    
 }

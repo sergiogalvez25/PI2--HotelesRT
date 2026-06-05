@@ -52,7 +52,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long>{
             AND estado = 'CONFIRMADA'
             ORDER BY fecha_entrada ASC
             """, nativeQuery = true)
-    List<Reserva> findreservasEnRango(
+    List<Reserva> findReservasEnRango(
             @Param("fechaInicio") LocalDate fechaInicio,
             @Param("fechaFin") LocalDate fechaFin);
 

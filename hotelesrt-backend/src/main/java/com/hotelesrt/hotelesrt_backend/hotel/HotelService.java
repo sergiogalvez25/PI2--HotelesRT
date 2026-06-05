@@ -28,7 +28,7 @@ public class HotelService{
         return hotelRepository.findByActivoTrue();
     }
     // buscar un hotel concreto con el id
-    public List<Hotel> obtenerHotel(Long id){
+    public Hotel obtenerHotel(Long id){
         return hotelRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Hotel no encontrado con el id:" id));
 
