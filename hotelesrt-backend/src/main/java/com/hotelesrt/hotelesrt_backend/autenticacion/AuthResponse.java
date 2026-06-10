@@ -1,6 +1,7 @@
 package com.hotelesrt.hotelesrt_backend.autenticacion;
 
 public class AuthResponse {
+    private Long id;
     private String token;
     private String email;
     private String nombre;
@@ -8,11 +9,11 @@ public class AuthResponse {
     private String rol;
 
     //Constructor
-    public AuthResponse(String token,String email,
+    public AuthResponse(Long id, String token,String email,
                         String nombre, String apellidos,
                         String rol){
 
-
+        this.id=id;
         this.token = token;
         this.email = email;
         this.nombre = nombre;
@@ -20,6 +21,12 @@ public class AuthResponse {
         this.rol = rol;
      }
 
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
     public String getToken() {
         return token;
     }

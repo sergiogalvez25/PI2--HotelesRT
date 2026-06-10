@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AutenticacionController {
     @Autowired
     private AutenticacionService autenticacionService;
@@ -37,6 +37,7 @@ public class AutenticacionController {
                 String token = autenticacionService.registro(request);
                 Usuario usuario = autenticacionService.obtenerPerfil(token);
                 return ResponseEntity.ok(new AuthResponse(
+                    usuario.getId(),
                     token,
                     usuario.getEmail(),
                     usuario.getNombre(),
@@ -52,6 +53,7 @@ public class AutenticacionController {
             String token = autenticacionService.login(request);
             Usuario usuario = autenticacionService.obtenerPerfil(token);
             return ResponseEntity.ok(new AuthResponse(
+                    usuario.getId(),
                     token,
                     usuario.getEmail(),
                     usuario.getNombre(),

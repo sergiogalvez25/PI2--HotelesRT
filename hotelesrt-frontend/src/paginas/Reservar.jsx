@@ -1,22 +1,28 @@
 
-
-
+import hotelService from "../services/hotelService"
+import reservaService from "../services/reservaService"
+import Loader from "../componentes/comunes/Loader"
 
 // <>
-
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { use, useEffect, useState } from "react"
+import { useAutenticador } from "../context/AutenticadorContext"
+import ConfirmarHabitacion from "./ConfirmarHabitacion"
 
 function Reservar() {
 
     const navigate = useNavigate()
     const location = useLocation()
-    const { estaAutenticado, usuario } = useAuth()
+    const { estaAutenticado, usuario } = useAutenticador()
 
+
+
+    const [mostrarModal, setMostrarModal] = useState(false)
     // formulario de busqueda
     const [hoteles, setHoteles] = useState([])
     const [hotelSeleccionado, setHotelSeleccionado] = useState('')
-    const [fecha_entrada, setFechaEntrada] = useState('')
-    const [fecha_salida, setFechaSalida] = useState('')
+    const [fechaEntrada, setFechaEntrada] = useState('')
+    const [fechaSalida, setFechaSalida] = useState('')
     const [numPersonas, setnumPersonas] = useState(2)
 
     // resultados
@@ -30,7 +36,7 @@ function Reservar() {
     const [confirmando, setConfirmando] = useState(false)
     const [error, setError] = useState(null)
     const [exito, setExito] = useState(false)
-
+    const [filtroTipo, setFiltroTipo] = useState(null)
     // carga hoteles al montar
 
     useEffect(() => {
@@ -57,32 +63,50 @@ function Reservar() {
 
 
     const buscarDisponibilidad = async () => {
-        if(!hotelSeleccionado || !fecha_entrada || !fecha_salida){
+        if(!hotelSeleccionado || !fechaEntrada || !fechaSalida){
             setError('Por favor rellena todos los campos')
             return
         }
-        if(fecha_entrada >= fecha_salida) {
+        if(fechaEntrada >= fechaSalida) {
             setError('La fecha de salida debe ser posterior a la de entrada')
             return
         }
         setError(null)
         setBuscando(true)
         try{
-            const data = await hotelService.obtenerDisponibilidad(hotelSeleccionado, fecha_entrada, fecha_salida, numPersonas)
+            const data = await hotelService.obtenerDisponibilidad(hotelSeleccionado, fechaEntrada, fechaSalida, numPersonas)
             setHabitaciones(data)
             setBuscado(true)
             setHabitacionElegida(null)
         } catch (err) {
-            setError('Error buscando disponibilidad')
+            console.error('Error completo:', err)
+            setError('Error buscando disponibilidad' + err.message)
         } finally {
             setBuscando(false)
         }
     }
+
+
+
+    // funcion para la tabla
+    const habitacionesAgrupadas = () => {
+        const tipos =['DOBLE', 'DOBLEM', 'FAMILIAR','SUITE']
+        const filtradas = filtroTipo ? habitaciones.filter(h => h.tipo === filtroTipo) : habitaciones
+
+        return tipos.filter(tipo => filtradas.some(h => h.tipo === tipo))
+                    .map(tipo => {
+                        const delTipo = filtradas.filter(h => h.tipo === tipo)
+                        const masBarata = delTipo.reduce((min, h) => h.precioNoche < min.precioNoche ? h : min, delTipo[0])
+                        return { tipo, cantidad: delTipo.length, habitacion: masBarata }
+                    })
+    }
+
     // seleccionar habitacion
     const seleccionarHabitacion = async (habitacion) => {
         setHabitacionElegida(habitacion)
+        setMostrarModal(true)
         try {
-            const precio = await hotelService.calcularPrecio(hotelSeleccionado, habitacion.id, fecha_entrada, fecha_salida)
+            const precio = await hotelService.calcularPrecio(hotelSeleccionado, habitacion.id, fechaEntrada, fechaSalida)
             setPrecioTotal(precio)
         } catch (err) {
             setPrecioTotal(habitacion.precioNoche)
@@ -100,8 +124,8 @@ function Reservar() {
             await reservaService.crearReserva({
                 hotel_id: hotelSeleccionado,
                 habitacion_id: habitacionElegida.id,
-                fecha_entrada,
-                fecha_salida,
+                fecha_entrada: fechaEntrada,
+                fecha_salida: fechaSalida,
                 numPersonas
             })
             setExito(true)
@@ -112,9 +136,9 @@ function Reservar() {
             setConfirmando(false)
         }
     }
-    const noches= fecha_entrada && fecha_salida 
+    const noches= fechaEntrada && fechaSalida 
         ? Math.max(0, Math.ceil(
-            (new Date(fecha_salida) - new Date(fecha_entrada)) 
+            (new Date(fechaSalida) - new Date(fechaEntrada)) 
             / (1000 * 60 * 60 * 24)
           )) 
         : 0
@@ -170,7 +194,7 @@ function Reservar() {
                                     </label>
                                     <input type="date"
                                             className="form-control py-3"
-                                            value={fecha_entrada}
+                                            value={fechaEntrada}
                                             onChange={e => setFechaEntrada(e.target.value)}
                                             style={{ backgroundColor: '#f3f4f5', border: '1px solid #727780', borderRadius: '8px'}} />
                                 </div>
@@ -181,7 +205,7 @@ function Reservar() {
                                     </label>
                                     <input type="date"
                                             className="form-control py-3"
-                                            value={fecha_salida}
+                                            value={fechaSalida}
                                             onChange={e => setFechaSalida(e.target.value)}
                                             style={{ backgroundColor: '#f3f4f5', border: '1px solid #727780', borderRadius: '8px'}} />
                                 </div>
@@ -218,8 +242,8 @@ function Reservar() {
                                 </span>
                             </div>
                             {habitaciones.length === 0 ? (
-                                <div className="tex-center py-5 text-muted">
-                                    <span className="material-symbols-outlined" style={{ fontSize:'48px' }}>
+                                <div className="text-center py-5 text-muted">
+                                    <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>
                                         bed
                                     </span>
                                     <p className="mt-3">
@@ -227,69 +251,109 @@ function Reservar() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="d-flex flex-column gap-3">
-                                    {/*  Parte superior */}
-                                    {habitaciones.map(hab => (
-                                        <div key={hab.id}
-                                             className="d-flex bg-white rounded-3 overflow-hidden"
-                                             style={{
-                                                border: habitacionElegida?.id === hab.id
-                                                ? '2px solid #003358'
-                                                : '1px solid rgba(193,199,208,0.2)',
-                                            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                                            transition: 'box-shadow 0.3s'
-                                             }}>
-                                            <div className="overflow-hidden flex-shrink-0"
-                                                 style={{ width:'288px', height: '192px' }}>
-                                                <img src={hab.imagenUrl} alt={hab.numero}
-                                                     className="w-100 h-100 object-fit-cover" />
-                                            </div>
-                                            <div className="p-4 d-flex flex-column justify-content-between">
-                                                <h4 className="fw-semibold mb-1"
-                                                    style={{ fontSize: '24px', color: '#1a1a1a'}}>
-                                                    Habitación {hab.numero}    
-                                                </h4>
-                                                {hab.tipo === 'SUITE' && (
-                                                    <span className="fw-bold d-flex align-items-center gap-1"
-                                                          style={{ color: '#23a745',
-                                                                   fontSize: '12px' }}>
-                                                        <span className="material-symbols-outlined"
-                                                              style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1"}}>
-                                                            check_circle
-                                                        </span>
-                                                        RECOMENDADO
-                                                    </span>
-                                                )}
-                                            
-                                            <p style={{ color: '#42474f', fontSize: '14px' }}>
-                                                {hab.tipo}  Capacidad: {hab.capacidad} personas
-                                            </p>
-                                            <p style={{ color: '#42474f', fonSize:'14px'}}>
-                                                {hab.descripcion}
-                                            </p>
-                                        </div>
-                                        <div className="d-flex justify-content-between align-items-end mt-3">
-                                            <div>
-                                                <span className="fw-bold text-uppercase d-block"
-                                                      style={{ fontSize: '10px', color: '#42474f', letterSpacing: '0.05em' }}>
-                                                    Precio por Noche
-                                                </span>
-                                                <span className="fw-bold"
-                                                      style={{ fontSize: '24px', color: '#003358' }}>
-                                                    {hab.precioNoche} €
-                                                </span>
-                                            </div>
-                                            <button className="btn px-4 py-2 fw-semibold"
-                                                    onClick={() => seleccionarHabitacion(hab) }
-                                                    style={{ backgroundColor: '#00677e', color: 'white',
-                                                             borderRadius: '8px', fontSize: '16px' }}>
-                                                Seleccionar
-                                            </button>
-                                        </div>
+                                <>
+                                    <div className="d-flex gap-2 mb-4 flex-wrap">
+                                        {['DOBLE', 'DOBLEM', 'FAMILIAR', 'SUITE'].map(tipo => {
+                                            const count = habitaciones.filter(h => h.tipo === tipo).length
+                                            if(count === 0) return null
+                                            const labels = {DOBLE: 'Doble Twin', DOBLEM: 'Doble', FAMILIAR: 'Familiar', SUITE: 'suite'}
 
-                                        </div>
-                                    ))}
-                                </div>
+                                            return (
+                                                <button key={tipo}
+                                                        onClick={() => setFiltroTipo(filtroTipo === tipo ? null : tipo)}
+                                                        className="btn fw-semibold d-flex align-items-center gap-2"
+                                                        style={{
+                                                            backgroundColor: filtroTipo === tipo ? '#003358' : 'white',
+                                                            color: filtroTipo === tipo ? 'white' : '#003358', 
+                                                            border: '1px solid #003358',
+                                                            borderRadius: '8px',
+                                                            fontSize: '14px'
+                                                        }}>
+                                                {labels[tipo]}
+                                                <span className="px-2 py-0 rounded-pill fw-bold"
+                                                style={{ fontSize: '11px', backgroundColor: filtroTipo === tipo ? 'rgba(255,255,255,0.2)' : '#e8f0fe',
+                                                         color: filtroTipo === tipo ? 'white' : '#003358'
+                                                        }}>
+                                                    {count}
+                                                 </span>
+                                                    
+                                                </button>
+                                            )
+                                        })}
+                                        {filtroTipo && (
+                                            <button onClick={() => setFiltroTipo(null)}
+                                                    className="btn fw-semibold"
+                                                    style={{ color: '#727780', fontSize: '14px'}}>
+                                                Ver todos
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="d-flex flex-column gap-3">
+                                        {habitacionesAgrupadas().map(({ tipo, cantidad, habitacion:hab}) => (
+                                            <div key={tipo}
+                                                 className="d-flex bg-white rounded-3 overflow-hidden" 
+                                                 style={{
+                                                    border: habitacionElegida?.id === hab.id
+                                                    ? '2px solid #003358' : '1px solid rgba(193,199,208,0.2)',
+                                                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                                                transition: 'box-shadow 0.3s'
+                                                 }}>
+                                                <div className="overflow-hidden flex-shrink-0" style={{ width:'288px', height: '192px' }}>
+                                                    <img src={`http://localhost:8080${hab.imagenUrl.replace('/imagenes', '')}/1.jpg`}
+                                                         alt={hab.tipo}
+                                                         className="w-100 h-100 object-fit-cover" />
+                                                </div>
+                                                 <div className="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                                    <div>
+                                                        <div className="d-flex align-items-center gap-2 mb-1">
+                                                            <h4 className="fw-semibold mb-0" style={{ fontSize: '24px', color: '#1a1a1a'}}>
+                                                                Habitación {tipo === 'DOBLE' ? 'Doble Twin' : tipo === 'DOBLEM' ? 'Doble' : tipo === 'FAMILIAR' ? 'Familiar' : 'Suite'}
+
+                                                            </h4>
+                                                            { tipo === 'SUITE' && (
+                                                                <span className="fw-bold d-flex align-items-center gap-1" style={{ color: '#23a745', fontSize: '12px' }}>
+                                                                    <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1"}}>
+                                                                        check_circle
+                                                                    </span>
+                                                                    RECOMENDADO
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <span className="px-2 py-1 rounded-pill fw-bold mb-2 d-inline-block"
+                                                              style={{ fontSize: '12px', backgroundColor: '#e8f4fd', color: '#003358' }}>
+                                                            {cantidad} habitaciones disponibles
+                                                        </span>
+                                                        <p style={{ color: '#42474f', fontSize: '14px', marginTop: '8px'}}>
+                                                            Capacidad: {hab.capacidad} personas
+                                                        </p>
+                                                        <p style={{ color: '#42474f', fontSize: '14px'}}>
+                                                            {hab.descripcion}
+                                                        </p>
+                                                    </div>
+                                                    <div className="d-flex justify-content-between align-items-end mt-3">
+                                                        <div>
+                                                            <span className="fw-bold text-uppercase d-block" style={{ fontSize: '10px', color: '#42474f', letterSpacing: '0.05em' }}>
+                                                                Precio desde
+                                                            </span>
+                                                            <span className="fw-bold" style={{ fontSize: '24px', color: '#003358' }}>
+                                                                {hab.precioNoche} €
+                                                            </span>
+                                                            <span style={{ fontSize: '12px', color: '#42474f' }}> /noche</span>
+                                                        </div>
+                                                        <button className="btn px-4 py-2 fw-semibold"
+                                                                onClick={() => seleccionarHabitacion(hab)}
+                                                                style={{ backgroundColor: '#00677e', color: 'white', borderRadius: '8px', fontSize: '16px' }}>
+                                                            Seleccionar
+                                                        </button>
+                                                    </div>
+                                                 </div>
+                                                 </div>
+
+                                        ))}
+                                        </div>    
+                                
+                                
+                                </>
                             )}
 
 
@@ -305,7 +369,7 @@ function Reservar() {
                     </div>
 
                     <aside style= {{flex: '0 0 28%' }}>
-                        <div className="rounded-3 overflow-hiddem"
+                        <div className="rounded-3 overflow-hidden"
                              style={{ position: 'sticky', top: '96px',
                                       border: '1px solid #c1c7d0', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
                             <div className="p-4"
@@ -352,7 +416,7 @@ function Reservar() {
                                                     Fechas
                                                 </span>
                                                 <p style={{ fontSize: '14px', color: '#1a1a1a' }}>
-                                                    {fecha_entrada} hasta {fecha_salida}
+                                                    {fechaEntrada} hasta {fechaSalida}
                                                 </p>
                                             </div>
                                             <div className="col-6">
@@ -387,7 +451,7 @@ function Reservar() {
                                     onClick={confirmarReserva}
                                     disabled={!habitacionElegida || confirmando}
                                     style={{
-                                        backgroundolor: habitacionElegida
+                                        backgroundColor: habitacionElegida
                                             ? '#003358' : '#003358',
                                         color: 'white',
                                         borderRadius: '8px',
@@ -407,6 +471,21 @@ function Reservar() {
                     </aside>
                 </div>
                   </main>
+
+
+                  {mostrarModal &&habitacionElegida &&  (
+                    <ConfirmarHabitacion
+                        habitacion={habitacionElegida}
+                        hotelId={hotelSeleccionado}
+                        onConfirmar={() => setMostrarModal(false)}
+                        onCerrar={() => {
+                            setMostrarModal(false)
+                            setHabitacionElegida(null)
+                        }}
+                    
+                    
+                    />
+                  )}
         </div>
     )
 

@@ -22,47 +22,47 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long>{
     // reservas de un cliente ordenadas por fecha 
     @Query(value = """
             SELECT * FROM reservas_local
-            WHERE cliente_id = :cliente_id
+            WHERE clienteId = :clienteId
             AND estado != 'CANCELADA'
-            ORDER BY fecha_entrada ASC
+            ORDER BY fechaEntrada ASC
             """, nativeQuery = true)
     List<Reserva> findReservasActivasByCliente(
-        @Param("cliente_id") Long cliente_id);
+        @Param("clienteId") Long clienteId);
 
     
     // Comprobar solapamiento para antesde crear la reserva 
     @Query (value = """
             SELECT COUNT(*) FROM reservas_local
-            WHERE habitacion_id = :habitacion_id
+            WHERE habitacionId = :habitacionId
             AND estado != 'CANCELADA'
-            AND fecha_entrada < :fecha_salida
-            AND fecha_salida > :fecha_entrada
+            AND fechaEntrada < :fechaSalida
+            AND fechaSalida > :fechaEntrada
             """, nativeQuery = true)
     Integer contarSolapamientos(
-        @Param("habitacion_id") Long habitacion_id,
-        @Param("fecha_entrada") LocalDate fecha_entrada,
-        @Param("fecha_salida") LocalDate fecha_salida);
+        @Param("habitacionId") Long habitacionId,
+        @Param("fechaEntrada") LocalDate fechaEntrada,
+        @Param("fechaSalida") LocalDate fechaSalida);
 
     //Reservas de un hotel en un rango de fechas
 
     @Query (value="""
             SELECT * FROM reservas_local
-            WHERE fecha_entrada >= :fechaInicio
-            AND fecha_salida <= :fechaFin
+            WHERE fechaEntrada < :fechaInicio
+            AND fechaSalida > :fechaFin
             AND estado = 'CONFIRMADA'
-            ORDER BY fecha_entrada ASC
+            ORDER BY fechaEntrada ASC
             """, nativeQuery = true)
     List<Reserva> findReservasEnRango(
-            @Param("fechaInicio") LocalDate fechaInicio,
-            @Param("fechaFin") LocalDate fechaFin);
+            @Param("fechaInicio") String fechaInicio,
+            @Param("fechaFin") String fechaFin);
 
     // Ocupacion de una habitacon en un mes concreto
     @Query(value = """
             SELECT COUNT(*) FROM reservas_local
-            WHERE habitacion_id = :habitacion_id
+            WHERE habitacionId = :habitacionId
             AND estado = 'CONFIRMADA'
-            AND MONT(fecha_entrada) = :mes
-            AND YEAR(fecha_entrada) = :year
+            AND strftime('%m', fechaEntrada) = printf('%02d', :mes)
+            AND strftime('%Y', fechaEntrada) = CAST(:year AS TEXT)
             """, nativeQuery = true)
     Integer contarReservasPorMes(
         @Param("habitacion_id") Long habitacion_id,
@@ -70,11 +70,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long>{
         @Param("year") Integer year);
     // ingress totales del hotel en un mes
     @Query(value = """
-            SELECT COALESCE(SUM(precio_total), 0)
+            SELECT COALESCE(SUM(precioTotal), 0)
             FROM reservas_local
             WHERE estado = 'CONFIRMADA'
-            AND MONT(fecha_entrada) = :mes
-            AND YEAR(fecha_entrada) = :year
+            AND strftime('%m', fechaEntrada) = printf('%02d', :mes)
+            AND strftime('%Y', fechaEntrada) = CAST(:year AS TEXT)
             """, nativeQuery = true)
     Double calcularIngresosMes(
         @Param("mes") Integer mes,

@@ -4,7 +4,9 @@ import { useAutenticador} from '../../context/AutenticadorContext'
 function Navbar(){
 
 
-    const {estaAutenticado, esAdmin, usuario, logout } = useAutenticador()
+
+    const {estaAutenticado, usuario, logout } = useAutenticador()
+    const esAdmin = usuario?.rol ==='ADMIN_HOTEL'
     const navigate = useNavigate()
 
     const handleLogout = () => {
@@ -49,7 +51,7 @@ function Navbar(){
                         </Link>
                     </li>
                 )}
-                {estaAdmin &&(
+                {esAdmin &&(
                     <li className="nav-item">
                         <Link className="nav-link text-white-50 fw-medium" to="/admin">
                             Panel Admin

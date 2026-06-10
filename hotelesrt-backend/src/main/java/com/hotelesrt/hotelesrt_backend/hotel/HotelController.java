@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hotelesrt.hotelesrt_backend.configuracion.HotelDataSourceContext;
 import com.hotelesrt.hotelesrt_backend.hotel.central.Hotel;
 import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
 
@@ -86,9 +87,15 @@ public class HotelController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                 LocalDate fechaSalida,
             @RequestParam(defaultValue = "1") Integer personas) {
+            HotelDataSourceContext.setHotelId(id);
+            try{
                 return ResponseEntity.ok(
                         disponibilidadService.buscarDisponibles(
                                 fechaEntrada, fechaSalida, personas));
+            } finally {
+                HotelDataSourceContext.clear();
+            }
+                
             }
     // Calcular precio por habitacion
     
@@ -100,8 +107,13 @@ public class HotelController {
                 LocalDate fechaEntrada,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                 LocalDate fechaSalida) {
-        return ResponseEntity.ok(
-                disponibilidadService.calcularPrecio(habitacion_id, fechaEntrada, fechaSalida));
+            HotelDataSourceContext.setHotelId(hotel_id);
+            try{
+                return ResponseEntity.ok(
+                        disponibilidadService.calcularPrecio(habitacion_id,fechaEntrada, fechaSalida));
+            } finally {
+                HotelDataSourceContext.clear();
+            }      
 
     }
     

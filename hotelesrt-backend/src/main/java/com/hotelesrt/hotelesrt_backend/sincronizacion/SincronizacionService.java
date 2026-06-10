@@ -24,16 +24,16 @@ public class SincronizacionService {
     public void onReservaCreada(ReservaCreadaEvent evento) {
         try {
             ReservaGlobal reservaGlobal = new ReservaGlobal();
-            reservaGlobal.setReservalocal_id(evento.getReserva_id());
-            reservaGlobal.setHotel_id(evento.getHotel_id());
-            reservaGlobal.setCliente_id(evento.getCliente_id());
-            reservaGlobal.setHabitacion_id(evento.getHabitacion_id());
-            reservaGlobal.setFechaEntrada(evento.getFecha_entrada());
-            reservaGlobal.setFechaSalida(evento.getFecha_salida());
+            reservaGlobal.setReservalocalId(evento.getReserva_id());
+            reservaGlobal.setHotelId(evento.getHotel_id());
+            reservaGlobal.setClienteId(evento.getCliente_id());
+            reservaGlobal.setHabitacionId(evento.getHabitacion_id());
+            reservaGlobal.setFechaEntrada(evento.getFecha_entrada().toString());
+            reservaGlobal.setFechaSalida(evento.getFecha_salida().toString());
             reservaGlobal.setPrecioTotal(evento.getPrecioTotal());
             reservaGlobal.setNumPersonas(evento.getNumPersonas());
             reservaGlobal.setEstado(EstadoReservaGlobal.CONFIRMADA);
-            reservaGlobal.setSincronizadoEn(LocalDateTime.now());
+            reservaGlobal.setSincronizadoEn(LocalDateTime.now().toString());
 
             reservaGlobalRepository.save(reservaGlobal);
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public class SincronizacionService {
             reservaGlobalRepository.findByReservaLocalId(evento.getReserva_id())
                     .ifPresent(reservaGlobal -> {
                         reservaGlobal.setEstado(EstadoReservaGlobal.CANCELADA);
-                        reservaGlobal.setSincronizadoEn(LocalDateTime.now());
+                        reservaGlobal.setSincronizadoEn(LocalDateTime.now().toString());
                         reservaGlobalRepository.save(reservaGlobal);
                     });
         } catch (Exception e) {

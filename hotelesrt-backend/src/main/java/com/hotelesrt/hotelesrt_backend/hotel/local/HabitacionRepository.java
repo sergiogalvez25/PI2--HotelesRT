@@ -1,4 +1,4 @@
-package com.hotelesrt.hotelesrt_backend.hotel;
+package com.hotelesrt.hotelesrt_backend.hotel.local;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
+import com.hotelesrt.hotelesrt_backend.hotel.TipoHabitacion;
 // <>
 @Repository
 public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
@@ -18,17 +18,17 @@ public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
 
     List<Habitacion> findByDisponibleTrue();
     List<Habitacion> findByTipo(TipoHabitacion tipo);
-    List<Habitacion> findByCapacidadMayoroIgual(Integer capacidad);
+    List<Habitacion> findByCapacidadGreaterThanEqual(Integer capacidad);
 //bucar habitaciones por fechas disponibles
     @Query(value = """
             SELECT h.* FROM habitaciones h 
             WHERE h.disponible = 1
             AND h.capacidad >= :capacidad
             AND h.id NOT IN (
-                SELECT r.habitacion_id FROM reservas_local r
+                SELECT r.habitacionId FROM reservas_local r
                 WHERE r.estado != 'CANCELADA'
-                AND r.fecha_entrada < : fechaSalida
-                AND r.fecha_salida > :fechaEntrada
+                AND r.fechaEntrada < :fechaSalida
+                AND r.fechaSalida > :fechaEntrada
             )
             """, nativeQuery = true)
     List<Habitacion> findDisponibles(
@@ -41,10 +41,10 @@ public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
             WHERE h.disponible = 1
             AND h.tipo = :tipo
             AND h.id NOT IN (
-                SELECT r.habitacion_id FROM reservas_local r
+                SELECT r.habitacionId FROM reservas_local r
                 WHERE r.estado != 'CANCELADA'
-                AND r.fecha_entrada < : fechaSalida
-                AND r.fecha_salida > :fechaEntrada
+                AND r.fechaEntrada < :fechaSalida
+                AND r.fechaSalida > :fechaEntrada
             )
             """, nativeQuery = true)
         List<Habitacion> findDisponiblesByTipo(
@@ -55,10 +55,10 @@ public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
 // comprobar si hay alguna habitacion con alguna reserva solapada entre ellas 
     @Query(value= """
             SELECT COUNT(*) FROM reservas_local
-            WHERE habitacion_id = :habitacionID
+            WHERE habitacionId = :habitacionID
             AND estado != 'CANCELADA'
-            AND fecha_entrada < : fechaSalida
-            AND fecha_salida > :fechaEntrada
+            AND fechaEntrada < :fechaSalida
+            AND fechaSalida > :fechaEntrada
             """, nativeQuery = true)
     Integer contarSolapamientosdeReservas(
         @Param("habitacionID") Long habitacionID,

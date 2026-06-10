@@ -1,13 +1,17 @@
 
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAutenticador } from "../context/AutenticadorContext"
 // <>
 
-function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
+function ConfirmarHabitacion({ habitacion, hotelId, onConfirmar, onCerrar }) {
 
 
 
     const [slideActual, setSlideActual] = useState(0)
 
-    const imagenes = [habitacion?.imagenUrl]
+    const imagenes = [1, 2, 3, 4, 5].map(n => `http://localhost:8080${habitacion?.imagenUrl.replace('/imagenes', '')}/${n}.jpg`   )
 
     const moverSlide = (index) => {
         setSlideActual(index)
@@ -38,7 +42,7 @@ function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
                      onClick={e =>e.stopPropagation()}
                      style={{ maxWidth: '896px', maxHeight: '90vh', boxShadow: '0 25px 50px rgba(0,0,0,0.25)'}}>
 
-                <button className="btn position-aboslute rounded-circle p-2"
+                <button className="btn position-absolute rounded-circle p-2"
                         onClick={onCerrar} style={{ top:'16px', right: '16px', zIndex: 1010,
                               backgroundColor: 'rgba(255,255,255,0.2)',
                               color: 'white',
@@ -60,8 +64,43 @@ function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
                              style={{ width: '100%', height: '100%', minWidth: '100%'}} />
                     ))}
                     </div>
-                    {/* pUNTOS DE NAVEGACION */}  
+                    {/* pUNTOS DE NAVEGACION */}
+                    <div className="position-absolute d-flex gap-2"
+                         style={{ bottom: '16px', left:'50%', transform: 'translateX(-50%)' }}>
+                        {imagenes.map((_, index) => (
+                            <button key={index}
+                                    onClick={() => moverSlide(index)}
+                                    className="rounded-circle border-0 p-0"
+                                    style={{ width: '8px', height: '8px',
+                                             backgroundColor: 'white',
+                                             opacity: index === slideActual ? 1 : 0.4,
+                                             cursor: 'pointer' }}/>
+                        ))}   
+                            
+                    </div>  
                     {/* Flechas de slide */} 
+                    <button className="btn position-absolute rounded-circle p-1"
+                            onClick={() => moverRelativo(-1)}
+                            style={{ left:'8px', top: '50%', transform: 'translateY(-50%)',
+                                     backgroundColor: 'rgba(0,0,0,0.3)', color: 'white', border: 'none' }}>
+                        <span className="material-symbols-outlined">
+                            chevron_left
+                        </span>
+                    </button>
+                    <button className="btn position-absolute rounded-circle p-1"
+                            onClick={() => moverRelativo(1)}
+                            style={{ right:'8px', top: '50%', transform: 'translateY(-50%)',
+                                     backgroundColor: 'rgba(0,0,0,0.3)', color: 'white', border: 'none' }}>
+                        <span className="material-symbols-outlined">
+                            chevron_right
+                        </span>
+                    </button>
+
+
+
+
+
+                     </div>
 
 
                     {/* parte derecha  */}
@@ -75,7 +114,7 @@ function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
                         </div>
                         <h3 className="fw-semibold mb-1"
                             style={{ fontSize:'24px', color:'#003358' }}>
-                        Hotel {habitacion.hotel_id}
+                        Hotel {hotelId}
                         </h3>
                         <h2 className="fw-bold mb-4" style={{ fontSize: '32px', color: '#1a1a1a' }}>
                             Habitacion {habitacion.numero}
@@ -128,7 +167,7 @@ function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
                             </div>
                             <div className="d-flex align-items-center gap-1"
                                  style={{ color: '#28a745' }}>
-                                <span className="material-symbol-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1"}}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1"}}>
                                     check_circle
                                 </span>
                                 <span className="fw-bold" style={{ fontSize: '12px', letterSpacing: '0.05em'}}>
@@ -144,7 +183,7 @@ function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
                                          borderRadius: '8px',
                                          fontSize:'16px'}}>
                             Confirmar Reserva
-                            <span className="material-symbol-outlined">
+                            <span className="material-symbols-outlined">
                                 arrow_forward
                             </span>
                         </button>
@@ -154,7 +193,7 @@ function ConfirmarHabitacion({ habitacion, onConfirmar, onCerrar }) {
                 </div>    
                         
             </div>
-        </div>
+       
     )
 
 }

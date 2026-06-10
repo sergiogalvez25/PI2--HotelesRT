@@ -2,8 +2,10 @@ package com.hotelesrt.hotelesrt_backend.autenticacion;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
@@ -33,7 +35,7 @@ public class Usuario implements UserDetails {
     private String direccion;
     @Enumerated(EnumType.STRING)
     private Rol rol;
-    private Long hotel_id;
+    private Long hotelId;
     private LocalDate fechaRegistro;
     private boolean activo;
 
@@ -41,17 +43,15 @@ public class Usuario implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
+        return List.of(new SimpleGrantedAuthority(rol.name()));
     }
     @Override
     public String getPassword() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPassword'");
+        return password;
     }
     @Override
     public String getUsername() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+        return email;
     }
     
     //getters y setters de los atributos
@@ -82,6 +82,7 @@ public class Usuario implements UserDetails {
     public void setPassword(String password) {
         this.password = password;
     }
+    
     public String getTelefono() {
         return telefono;
     }
@@ -100,11 +101,11 @@ public class Usuario implements UserDetails {
     public void setRol(Rol rol) {
         this.rol = rol;
     }
-    public Long getHotel_id() {
-        return hotel_id;
+    public Long getHotelId() {
+        return hotelId;
     }
-    public void setHotel_id(Long hotel_id) {
-        this.hotel_id = hotel_id;
+    public void setHotelId(Long hotelId) {
+        this.hotelId = hotelId;
     }
     public LocalDate getFechaRegistro() {
         return fechaRegistro;

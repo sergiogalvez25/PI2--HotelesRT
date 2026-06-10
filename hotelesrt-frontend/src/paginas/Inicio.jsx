@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react"
 import Loader from "../componentes/comunes/Loader"
-
-
+import { useNavigate } from "react-router-dom"
+import imgSlide1 from '../assets/imagenes-estaticas/img-slide1.png'
+import imgSlide2 from '../assets/imagenes-estaticas/img-slide2.png'
+import imgSlide3 from '../assets/imagenes-estaticas/img-slide3.png'
+import hotelService from '../services/hotelService'
+import TarjetaHotel from '../componentes/hotel/TarjetaHotel'
+import TarjetaReserva from '../componentes/reserva/TarjetaReserva'
 // <>
 
 
 
 const colorGradeado = { 
-    backgroundColor: 'linear-gradient(to right, rgba(0,51,88,0.9) 0%, rgba(0,51,88,0.6) 40%, rgba(0,51,88,0) 100%) '
+    background: 'linear-gradient(to right, rgba(0,51,88,0.9) 0%, rgba(0,51,88,0.6) 40%, rgba(0,51,88,0) 100%) '
 
 }
 const sombraTarjeta = {
@@ -16,11 +21,9 @@ const sombraTarjeta = {
 }
 
 const imagenesSlide = [
-    'imagen1',
-    'imagen2',
-    'imagen3',
-    'imagen4',
-    'imagen5'
+    imgSlide1,
+    imgSlide2,
+    imgSlide3
 ]
 
 function Inicio() {
@@ -60,7 +63,7 @@ function Inicio() {
     return (
         <div style={{ backgroundColor: '#f8f9fa' }}>
 
-        <section className="position-relative overflow-hidden"
+        <section className="position-relative overflow-hidden mx-4 mx-md-5 rounded-3"
                  style={{ height: '700px'}}>
 
             <img src={imagenesSlide[slideActual]} alt="Hotel de lujo"
@@ -82,7 +85,7 @@ function Inicio() {
                             Explora una coleccion curada de hoteles de lujo diseñados para ofrecerte una estancia inolvidable
                             con el maximo confort y elegancia.
                         </p>
-                        <button className="btn px-5 pt-3 fw-semibold"
+                        <button className="btn px-5 pt-3 pb-3 fw-semibold"
                                 onClick={() => navigate('/reservar')}
                                 style={{ backgroundColor: '#00677e',
                                          color: 'white',
@@ -128,7 +131,7 @@ function Inicio() {
             </div>
             <span className="fw-semibold"
                   onClick={() => navigate('/reservar')}
-                  style={{ color: '#003358', cursor: 'pointer', fontSize:'16px '}}>
+                  style={{ color: '#003358', cursor: 'pointer', fontSize:'16px'}}>
                 Ver todos los destinos
             </span>
             </div>
@@ -143,7 +146,7 @@ function Inicio() {
                 {hoteles.map(hotel => (
                     <div key={hotel.id}
                          className="col-12 col-sm-6 col-lg-3">
-                        <TarjetaHotel hotel={hotel.id}/>
+                        <TarjetaHotel hotel={hotel}/>
                     </div>
                 ))}
             </div>
@@ -154,7 +157,7 @@ function Inicio() {
          style={{ backgroundColor: '#f3f4f5' }}>
     <div className="mx-auto" style={{ maxWidth: '1280px' }}>
        <div className="mb-5">
-            <span className="fw bold text-uppercase"
+            <span className="fw-bold text-uppercase"
                   style={{ color: '#00677e', fontSize:'12px', letterSpacing: '0.05em' }}>
                 Oportunidades
             </span>

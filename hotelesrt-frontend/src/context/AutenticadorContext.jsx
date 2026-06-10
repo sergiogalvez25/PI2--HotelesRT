@@ -22,13 +22,15 @@ export function AutenticadorProvider({ children }) {
     const login = (AutenticadorResponse) => {
         localStorage.setItem('token', AutenticadorResponse.token)
         localStorage.setItem('usuario', JSON.stringify({
-
+            
+            id: AutenticadorResponse.id,
             email: AutenticadorResponse.email,
             nombre: AutenticadorResponse.nombre,
             apellidos: AutenticadorResponse.apellidos,
             rol: AutenticadorResponse.rol
         }))
         setUsuario({
+            id: AutenticadorResponse.id,
             email: AutenticadorResponse.email,
             nombre: AutenticadorResponse.nombre,
             apellidos: AutenticadorResponse.apellidos,

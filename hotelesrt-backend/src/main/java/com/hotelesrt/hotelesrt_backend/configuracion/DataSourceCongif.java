@@ -11,6 +11,7 @@ import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -22,6 +23,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 
 @Configuration
+@EnableJpaRepositories(
+    basePackages = {
+        "com.hotelesrt.hotelesrt_backend.autenticacion",
+        "com.hotelesrt.hotelesrt_backend.hotel",
+        "com.hotelesrt.hotelesrt_backend.sincronizacion",
+        "com.hotelesrt.hotelesrt_backend.admin"
+    },
+    entityManagerFactoryRef = "centralEntityManagerFactory",
+    transactionManagerRef = "centralTransactionManager"
+)
 public class DataSourceCongif {
     
 
@@ -50,16 +61,16 @@ public class DataSourceCongif {
     }
     // Entity manager para la BD central
 
-    @Bean(name="centralEntityManagerFactory")
+    @Bean(name={"centralEntityManagerFactory", "entityManagerFactory"})
     @Primary
     public LocalContainerEntityManagerFactoryBean centralEntityManagerFactory(){
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 
         factory.setDataSource(centralDataSource());
         factory.setPackagesToScan(
-                "com.hotelesrt.backend.auth",
-                "com.hotelesrt.backend.hotel.central",
-                "com.hotelesrt.backend.sincronizacion"
+                "com.hotelesrt.hotelesrt_backend.autenticacion",
+                "com.hotelesrt.hotelesrt_backend.hotel.central",
+                "com.hotelesrt.hotelesrt_backend.sincronizacion"
         );
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         factory.setJpaVendorAdapter(adapter);
@@ -75,9 +86,9 @@ public class DataSourceCongif {
     }
 
     // transaction manager para el MySQL central
-    @Bean(name = "centraltransactionManager")
+    @Bean(name = {"centralTransactionManager", "transactionManager" })
     @Primary
-    public PlatformTransactionManager centraltransactionManager() {
+    public PlatformTransactionManager centralTransactionManager() {
         JpaTransactionManager manager = new JpaTransactionManager();
         manager.setEntityManagerFactory(centralEntityManagerFactory().getObject());
         return manager;
@@ -86,41 +97,63 @@ public class DataSourceCongif {
     // hacemos lo mismo para los hoteles: primero establecemos el datasource
     @Bean(name = "localDataSource")
     public DataSource localDataSource() {
-        return DataSourceBuilder.create()
-                .url("jdbc:sqlite:" + hotelesDBPath + "hotel_default.db")
+        Map<Object, Object> BDhoteles = new HashMap<>();
+
+        // Poner para cada hotel la BD de cada 1 
+        BDhoteles.put(1L, DataSourceBuilder.create()
+                .url("jdbc:sqlite:" + hotelesDBPath + "hotel_madrid.db")
                 .driverClassName("org.sqlite.JDBC")
-                .build();
+                .build());
+
+
+        BDhoteles.put(2L, DataSourceBuilder.create()
+                .url("jdbc:sqlite:" + hotelesDBPath + "hotel_bilbao.db")
+                .driverClassName("org.sqlite.JDBC")
+                .build());
+
+        BDhoteles.put(3L, DataSourceBuilder.create()
+                .url("jdbc:sqlite:" + hotelesDBPath + "hotel_sevilla.db")
+                .driverClassName("org.sqlite.JDBC")
+                .build());
+
+
+
+
+        
+
+        HotelDataSourceRouter router = new HotelDataSourceRouter();
+        router.setTargetDataSources(BDhoteles);
+        router.setDefaultTargetDataSource(BDhoteles.get(3L));
+        router.afterPropertiesSet();
+        return router;
     }
 
 
     // ahora el entitymanager
-    @Bean(name = "localEntityManagerFactoy")
-    @Primary
+    @Bean(name = "localEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean localEntityManagerFactory(){
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 
         factory.setDataSource(localDataSource());
         factory.setPackagesToScan(
-                "com.hotelesrt.backend.reservas",
-                "com.hotelesrt.backend.hotel.local"
+                "com.hotelesrt.hotelesrt_backend.reservas",
+                "com.hotelesrt.hotelesrt_backend.hotel.local"
         );
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         factory.setJpaVendorAdapter(adapter);
 
         Map<String, Object> props = new HashMap<>();
-        props.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+        props.put("hibernate.dialect", "org.hibernate.community.dialect.SQLiteDialect");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.show_sql", "true");
-        props.put("hibernate.format_sql", "true");
         factory.setJpaPropertyMap(props);
         factory.setPersistenceUnitName("local");
         return factory;
     }
 
     // y el transaction manager
-    @Bean(name = "localtransactionManager")
-    @Primary
-    public PlatformTransactionManager localtransactionManager() {
+    @Bean(name = "localTransactionManager")
+    public PlatformTransactionManager localTransactionManager() {
         JpaTransactionManager manager = new JpaTransactionManager();
         manager.setEntityManagerFactory(localEntityManagerFactory().getObject());
         return manager;

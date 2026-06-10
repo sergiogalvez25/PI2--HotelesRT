@@ -22,7 +22,7 @@ const reservaService = {
         const response = await axios.get('/api/reservas/historial', {
             params: {hotel_id}
         })
-        response.data
+        return response.data
     },
 
     obtenerDetalle: async (id, hotel_id) => {
@@ -32,7 +32,8 @@ const reservaService = {
         return response.data
     },
     cancelarReserva: async (id, hotel_id) => {
-        const response = await axios.get(`/api/reservas/${id}/cancelar`, null, {
+
+        const response = await axios.put(`/api/reservas/${id}/cancelar`, null, {
             params: {hotel_id}
         })
         return response.data

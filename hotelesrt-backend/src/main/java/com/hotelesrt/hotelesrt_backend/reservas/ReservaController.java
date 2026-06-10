@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.hotelesrt.hotelesrt_backend.configuracion.HotelDataSourceContext;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaGlobalResponse;
 import com.hotelesrt.hotelesrt_backend.autenticacion.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,26 +49,32 @@ public class ReservaController {
             HttpServletRequest httpRequest) {
 
         Long cliente_id = extraerClienteId(httpRequest);
-        return ResponseEntity.ok(reservaService.crearReserva(request, cliente_id));
-
+        HotelDataSourceContext.setHotelId(request.getHotel_id());
+        try{ 
+            return ResponseEntity.ok(reservaService.crearReserva(request, cliente_id));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
     }
     @GetMapping("/mis-reservas")
-    public ResponseEntity<List<ReservaResponse>> misReservas(
-        HttpServletRequest httpRequest,
-        @RequestParam Long hotel_id) {
+    public ResponseEntity<List<ReservaGlobalResponse>> misReservas(
+        HttpServletRequest httpRequest,@RequestParam Long hotel_id) {
 
         Long cliente_id = extraerClienteId(httpRequest);
-        return ResponseEntity.ok(reservaService.obtenerReservasActivas(cliente_id, hotel_id));
+        
+        return ResponseEntity.ok(reservaService.obtenerReservasActivas(cliente_id));
     }
 
     // Historial completo
     @GetMapping("/historial")
-    public ResponseEntity<List<ReservaResponse>> historial(
+    public ResponseEntity<List<ReservaGlobalResponse>> historial(
         HttpServletRequest httpRequest,
         @RequestParam Long hotel_id) {
 
         Long cliente_id = extraerClienteId(httpRequest);
-        return ResponseEntity.ok(reservaService.obtenerReservasCliente(cliente_id, hotel_id));
+         HotelDataSourceContext.setHotelId(hotel_id);
+        return ResponseEntity.ok(reservaService.obtenerReservasCliente(cliente_id));
     }
     // Detalle de una reserva 
     @GetMapping("/{id}")
@@ -77,19 +84,23 @@ public class ReservaController {
             HttpServletRequest httpRequest) {
        
         Long cliente_id = extraerClienteId(httpRequest);
-        return ResponseEntity.ok(reservaService.obtenerDetalle(id, cliente_id, hotel_id));
+         HotelDataSourceContext.setHotelId(hotel_id);
+        try{ 
+            return ResponseEntity.ok(reservaService.obtenerDetalle(id, cliente_id,hotel_id));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
         
     }
     // Cancelar reserva
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<ReservaResponse> cancelar(
             @PathVariable Long id,
-            @RequestParam Long hotel_id,
             HttpServletRequest httpRequest) {
        
         Long cliente_id = extraerClienteId(httpRequest);
-        return ResponseEntity.ok(reservaService.cancelarReserva(id, cliente_id, hotel_id));
-        
+        reservaService.cancelarReserva(id, cliente_id);
+        return ResponseEntity.ok().build();
     }
 
 

@@ -1,8 +1,8 @@
 package com.hotelesrt.hotelesrt_backend.hotel;
 
 public enum TipoHabitacion {
-    INDIVIDUAL,
     DOBLE,
+    DOBLEM,
     SUITE,
     FAMILIAR
 }

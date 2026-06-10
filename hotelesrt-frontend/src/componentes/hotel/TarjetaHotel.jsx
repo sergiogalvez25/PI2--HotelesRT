@@ -35,12 +35,12 @@ function TarjetaHotel({ hotel }) {
             
 
              <div style={{ height: '256px', overflow: 'hidden'}}>
-                <img src={hotel.imagenUrl}
+                <img src={`http://localhost:8080${hotel.imagenUrl.replace('/imagenes', '')}`}
                      alt={hotel.nombre}
                      className="w-100 h-100 object-fit-cover"
                      style={{ transition: 'transform 0.5s ease'}}
                      onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
-                     onMouseLeace={e => e.target.style.transform = 'scale(1)'} /> 
+                     onMouseLeave={e => e.target.style.transform = 'scale(1)'} /> 
              </div>
              <div className="card-body p-4">
                 <div className="d-flex justify-content-between align-items-center mb-2">

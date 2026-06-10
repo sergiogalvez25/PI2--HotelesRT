@@ -1,7 +1,6 @@
 package com.hotelesrt.hotelesrt_backend.sincronizacion;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 
 import com.hotelesrt.hotelesrt_backend.reservas.EstadoReserva;
 
@@ -22,17 +21,17 @@ public class ReservaGlobal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private Long hotel_id;
+    private Long hotelId;
     @Column(nullable = false)
-    private Long cliente_id;
+    private Long clienteId;
     @Column(nullable = false)
-    private Long habitacion_id;
+    private Long habitacionId;
     @Column(nullable = false)
-    private Long reservalocal_id;
+    private Long reservaLocalId;
     @Column(nullable = false)
-    private LocalDate fechaEntrada;
+    private String fechaEntrada;
     @Column(nullable = false)
-    private LocalDate fechaSalida;
+    private String fechaSalida;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoReservaGlobal estado;
@@ -41,47 +40,47 @@ public class ReservaGlobal {
     @Column(nullable = false)
     private Integer numPersonas;
     @Column(nullable = false)
-    private LocalDateTime sincronizadoEn;
+    private String sincronizadoEn;
     public Long getId() {
         return id;
     }
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getHotel_id() {
-        return hotel_id;
+    public Long getHotelId() {
+        return hotelId;
     }
-    public void setHotel_id(Long hotel_id) {
-        this.hotel_id = hotel_id;
+    public void setHotelId(Long hotelId) {
+        this.hotelId = hotelId;
     }
-    public Long getCliente_id() {
-        return cliente_id;
+    public Long getClienteId() {
+        return clienteId;
     }
-    public void setCliente_id(Long cliente_id) {
-        this.cliente_id = cliente_id;
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
     }
-    public Long getHabitacion_id() {
-        return habitacion_id;
+    public Long getHabitacionId() {
+        return habitacionId;
     }
-    public void setHabitacion_id(Long habitacion_id) {
-        this.habitacion_id = habitacion_id;
+    public void setHabitacionId(Long habitacionId) {
+        this.habitacionId = habitacionId;
     }
-    public Long getReservalocal_id() {
-        return reservalocal_id;
+    public Long getReservalocalId() {
+        return reservaLocalId;
     }
-    public void setReservalocal_id(Long reservalocal_id) {
-        this.reservalocal_id = reservalocal_id;
+    public void setReservalocalId(Long reservalocalId) {
+        this.reservaLocalId = reservalocalId;
     }
-    public LocalDate getFechaEntrada() {
+    public String getFechaEntrada() {
         return fechaEntrada;
     }
-    public void setFechaEntrada(LocalDate fechaEntrada) {
+    public void setFechaEntrada(String fechaEntrada) {
         this.fechaEntrada = fechaEntrada;
     }
-    public LocalDate getFechaSalida() {
+    public String getFechaSalida() {
         return fechaSalida;
     }
-    public void setFechaSalida(LocalDate fechaSalida) {
+    public void setFechaSalida(String fechaSalida) {
         this.fechaSalida = fechaSalida;
     }
     public EstadoReservaGlobal getEstado() {
@@ -102,10 +101,10 @@ public class ReservaGlobal {
     public void setNumPersonas(Integer numPersonas) {
         this.numPersonas = numPersonas;
     }
-    public LocalDateTime getSincronizadoEn() {
+    public String getSincronizadoEn() {
         return sincronizadoEn;
     }
-    public void setSincronizadoEn(LocalDateTime sincronizadoEn) {
+    public void setSincronizadoEn(String sincronizadoEn) {
         this.sincronizadoEn = sincronizadoEn;
     }
 

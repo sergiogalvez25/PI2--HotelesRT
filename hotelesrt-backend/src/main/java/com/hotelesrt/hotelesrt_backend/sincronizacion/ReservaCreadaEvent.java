@@ -1,6 +1,6 @@
 package com.hotelesrt.hotelesrt_backend.sincronizacion;
 
-import java.time.LocalDate;
+
 
 import org.springframework.context.ApplicationEvent;
 
@@ -10,8 +10,8 @@ public class ReservaCreadaEvent extends ApplicationEvent{
     private final Long hotel_id;
     private final Long cliente_id;
     private final Long habitacion_id;
-    private final LocalDate fecha_entrada;
-    private final LocalDate fecha_salida;
+    private final String fecha_entrada;
+    private final String fecha_salida;
     private final Double precioTotal;
     private final Integer numPersonas;
 
@@ -20,8 +20,8 @@ public class ReservaCreadaEvent extends ApplicationEvent{
                                 Long hotel_id,
                                 Long cliente_id,
                                 Long habitacion_id,
-                                LocalDate fecha_entrada,
-                                LocalDate fecha_salida,
+                                String fecha_entrada,
+                                String fecha_salida,
                                 Double precioTotal,
                                 Integer numPersonas) {
         super(source);
@@ -51,11 +51,11 @@ public class ReservaCreadaEvent extends ApplicationEvent{
         return habitacion_id;
     }
 
-    public LocalDate getFecha_entrada() {
+    public String getFecha_entrada() {
         return fecha_entrada;
     }
 
-    public LocalDate getFecha_salida() {
+    public String getFecha_salida() {
         return fecha_salida;
     }
 

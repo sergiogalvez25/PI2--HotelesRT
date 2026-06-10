@@ -7,7 +7,7 @@ package com.hotelesrt.hotelesrt_backend.reservas;
 
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+
 
 
 @Entity
@@ -19,13 +19,13 @@ public class PrecioTemporada {
     private Long id;
 
     @Column(nullable = false)
-    private Long habitacion_id;
+    private Long habitacionId;
     @Column(nullable = false)
     private String nombreTemporada;
     @Column(nullable = false)
-    private LocalDate fechaInicio;
+    private String fechaInicio;
     @Column(nullable = false)
-    private LocalDate fechaFin;
+    private String fechaFin;
     @Column(nullable = false)
     private Double precio;
     public Long getId() {
@@ -34,11 +34,11 @@ public class PrecioTemporada {
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getHabitacion_id() {
-        return habitacion_id;
+    public Long getHabitacionId() {
+        return habitacionId;
     }
-    public void setHabitacion_id(Long habitacion_id) {
-        this.habitacion_id = habitacion_id;
+    public void setHabitacionId(Long habitacionId) {
+        this.habitacionId = habitacionId;
     }
     public String getNombreTemporada() {
         return nombreTemporada;
@@ -46,16 +46,16 @@ public class PrecioTemporada {
     public void setNombreTemporada(String nombreTemporada) {
         this.nombreTemporada = nombreTemporada;
     }
-    public LocalDate getFechaInicio() {
+    public String getFechaInicio() {
         return fechaInicio;
     }
-    public void setFechaInicio(LocalDate fechaInicio) {
+    public void setFechaInicio(String fechaInicio) {
         this.fechaInicio = fechaInicio;
     }
-    public LocalDate getFechaFin() {
+    public String getFechaFin() {
         return fechaFin;
     }
-    public void setFechaFin(LocalDate fechaFin) {
+    public void setFechaFin(String fechaFin) {
         this.fechaFin = fechaFin;
     }
     public Double getPrecio() {

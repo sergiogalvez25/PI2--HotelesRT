@@ -10,9 +10,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
+import com.hotelesrt.hotelesrt_backend.configuracion.HotelDataSourceContext;
 import com.hotelesrt.hotelesrt_backend.hotel.DisponibilidadService;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.EstadoReservaGlobal;
 import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaCanceladaEvent;
 import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaCreadaEvent;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaGlobal;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaGlobalRepository;
+import com.hotelesrt.hotelesrt_backend.sincronizacion.ReservaGlobalResponse;
 
 import jakarta.transaction.Transactional;
 
@@ -24,6 +29,8 @@ import jakarta.transaction.Transactional;
 public class ReservaService {
     @Autowired
     private ReservaRepository reservaRepository;
+    @Autowired
+    private ReservaGlobalRepository reservaGlobalRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -66,15 +73,15 @@ public class ReservaService {
         // Crear la reserva
 
         Reserva reserva = new Reserva();
-        reserva.setCliente_id(cliente_id);
-        reserva.setHabitacion_id(request.getHabitacion_id());
-        reserva.setFechaEntrada(request.getFecha_entrada());
-        reserva.setFechaSalida(request.getFecha_salida());
+        reserva.setClienteId(cliente_id);
+        reserva.setHabitacionId(request.getHabitacion_id());
+        reserva.setFechaEntrada(request.getFecha_entrada().toString());
+        reserva.setFechaSalida(request.getFecha_salida().toString());
         reserva.setEstado(EstadoReserva.CONFIRMADA);
         reserva.setPrecioTotal(precio_total);
         reserva.setNumPersonas(request.getNumPersonas());
         reserva.setPeticiones(request.getPeticiones());
-        reserva.setFechaCreacion(LocalDate.now());
+        reserva.setFechaCreacion(LocalDate.now().toString());
 
         // gestionamos ahora lo del Optimistic Locking
         try {
@@ -90,7 +97,7 @@ public class ReservaService {
                 reserva.getId(),
                 request.getHotel_id(),
                 cliente_id,
-                reserva.getHabitacion_id(),
+                reserva.getHabitacionId(),
                 reserva.getFechaEntrada(),
                 reserva.getFechaSalida(),
                 reserva.getPrecioTotal(),
@@ -101,47 +108,45 @@ public class ReservaService {
 
      // Cancelar reserva
      @Transactional
-     public ReservaResponse cancelarReserva(Long reserva_id, Long cliente_id, Long hotel_id) {
+     public void cancelarReserva(Long reserva_id, Long cliente_id) {
+            ReservaGlobal reserva = reservaGlobalRepository.findById(reserva_id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada en la BD global"));
 
-
-        Reserva reserva = reservaRepository.findById(reserva_id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
-
-        if(!reserva.getCliente_id().equals(cliente_id)){
+        if(!reserva.getClienteId().equals(cliente_id)){
             throw new RuntimeException("No tienes permiso para cancelar esta reserva");
         }
+
+        HotelDataSourceContext.setHotelId(reserva.getHotelId());
         // verficiar si no esta cancelada ya 
-
-        if(reserva.getEstado() == EstadoReserva.CANCELADA){
-            throw new RuntimeException("La reserva ya ha sido cancelada.");
+        try{
+            reservaRepository.findById(reserva.getReservalocalId())
+                .ifPresent(reservaLocal -> {
+                    reservaLocal.setEstado(EstadoReserva.CANCELADA);
+                    reservaRepository.save(reservaLocal);
+                } );
+        } finally {
+            HotelDataSourceContext.clear();
         }
-        // cancelarla 
-        reserva.setEstado(EstadoReserva.CANCELADA);
-        reserva = reservaRepository.save(reserva);
+       reserva.setEstado(EstadoReservaGlobal.CANCELADA);
+       reservaGlobalRepository.save(reserva);
+        
 
-        // lamar al applicationevent
-        eventPublisher.publishEvent(new ReservaCanceladaEvent(
-                this,
-                reserva.getId(),
-                hotel_id
-        ));
-
-        return new ReservaResponse(reserva, hotel_id);
+        
      }   
 
      // Historial completo de un cliente
-     public List<ReservaResponse> obtenerReservasCliente(Long cliente_id, Long hotel_id) {
-        return reservaRepository.findByClienteId(cliente_id)
+     public List<ReservaGlobalResponse> obtenerReservasCliente(Long cliente_id) {
+        return reservaGlobalRepository.findByClienteId(cliente_id)
                 .stream()
-                .map(r -> new ReservaResponse(r, hotel_id))
+                .map(ReservaGlobalResponse::new)
                 .collect(Collectors.toList());
      }
     // Reservas activas de un cliente
 
-    public List<ReservaResponse> obtenerReservasActivas(Long cliente_id, Long hotel_id) {
-        return reservaRepository.findReservasActivasByCliente(cliente_id)
+    public List<ReservaGlobalResponse> obtenerReservasActivas(Long cliente_id) {
+        return reservaGlobalRepository.findByClienteId(cliente_id)
                 .stream()
-                .map(r -> new ReservaResponse(r, hotel_id))
+                .map(ReservaGlobalResponse::new)
                 .collect(Collectors.toList());
     }
 
@@ -150,7 +155,7 @@ public class ReservaService {
         Reserva reserva = reservaRepository.findById(reserva_id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        if(!reserva.getCliente_id().equals(cliente_id)) {
+        if(!reserva.getClienteId().equals(cliente_id)) {
             throw new RuntimeException("No tienes permiso para ver esta semana");
         }
 

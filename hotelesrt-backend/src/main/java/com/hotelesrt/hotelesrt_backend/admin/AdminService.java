@@ -4,17 +4,20 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.stereotype.Service;
 
-import com.hotelesrt.hotelesrt_backend.hotel.HabitacionRepository;
 import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
+import com.hotelesrt.hotelesrt_backend.hotel.local.HabitacionRepository;
+import com.hotelesrt.hotelesrt_backend.reservas.EstadoReserva;
 import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporada;
 import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporadaRepository;
 import com.hotelesrt.hotelesrt_backend.reservas.Reserva;
 import com.hotelesrt.hotelesrt_backend.reservas.ReservaRepository;
-import com.jetbrains.exported.JBRApi.Service;
+
 
 
 
@@ -76,10 +79,21 @@ public class AdminService {
     public List<Reserva> listarReservas(){
         return reservaRepository.findAll();
     }
-    public List<Reserva> listarReservasPorFecha(LocalDate fecha_inicio, LocalDate fecha_salida) {
-        return reservaRepository.findReservasEnRango(fecha_inicio,fecha_salida);
+    public List<Reserva> listarReservasPorFecha(LocalDate fechaInicio, LocalDate fechaFin) {
+        return reservaRepository.findAll()
+                .stream()
+                .filter(r -> r.getEstado() == EstadoReserva.CONFIRMADA)
+                .filter(r -> {
+                    LocalDate entrada = LocalDate.parse(r.getFechaEntrada());
+                    LocalDate salida = LocalDate.parse(r.getFechaSalida());
+                    return entrada.isBefore(fechaFin) && salida.isAfter(fechaInicio);
+                })
+                .collect(Collectors.toList());
     }
     // gestion del precio
+    public List<PrecioTemporada> listarTodosPreciosTemporada() {
+        return precioTemporadaRepository.findAll();
+    }
     public PrecioTemporada crearPrecioTemporada(PrecioTemporada precioTemporada) {
         return precioTemporadaRepository.save(precioTemporada);
     }
@@ -97,8 +111,8 @@ public class AdminService {
         Double ingresos = reservaRepository.calcularIngresosMes(mes, year);
 
         List<Reserva> reservasMes = reservaRepository.findReservasEnRango(
-            LocalDate.of(year,mes, 1),
-            LocalDate.of(year, mes, LocalDate.of(year,mes, 1).lengthOfMonth()));
+            (LocalDate.of(year,mes, 1)).toString(),
+            (LocalDate.of(year, mes, LocalDate.of(year,mes, 1).lengthOfMonth())).toString());
         
         Map<String, Object> estadisticas = new HashMap<>();
         estadisticas.put("ingresosMes", ingresos);

@@ -1,17 +1,24 @@
 
 
 
+import { Link, useNavigate } from "react-router-dom"
+import { useAutenticador } from "../context/AutenticadorContext"
+import autenticadorService from '../services/autenticadorService'
+import imgRegistro from '../assets/imagenes-estaticas/img-registro.png'
+
+
+
 
 // <>
 
 import { useState } from "react"
 
 
-function Login() {
+function Registro() {
 
 
     const navigate = useNavigate()
-    const { login } = useAuth()
+    const { login } = useAutenticador()
 
     const [email, setEmail] = useState('')
     const [ password, setPassword] = useState('')
@@ -43,7 +50,7 @@ function Login() {
             login(data)
             navigate('/')
         } catch(err) {
-            setError('Email o contraseña incorrectos')
+            setError('Email o contraseña incorrectos', err)
         } finally {
             setCargando(false)
         }
@@ -55,7 +62,7 @@ function Login() {
         <div className="d-flex" style={{ minHeight: '100vh' }}>
             <div className="d-none d-md-flex position-relative"
                  style={{ width:'50%', overflow: 'hidden'}}>
-                <img src="..." alt="..." className="w-100 h-100 object-fit-cover" />
+                <img src={imgRegistro} alt="Hotel de Lujo" className="w-100 object-fit-cover" style={{ height:'650px'}} />
                 <div className="position-absolute bottom-0 start-0 w-100"
                      style={{ background: 'linear-gradient(to top, rgba(0,29,53,0.8) 0%, rgba(0,29,53,0.2) 60%, transparent 100%',
                               height: '100%' }}/>
@@ -112,7 +119,7 @@ function Login() {
                                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)'}}>
                         <div className="mb-4">
                              <h2 className="fw-semibold mb-1"
-                                 style={{ fontSize: '24px', color: '##1a1a1a' }}>
+                                 style={{ fontSize: '24px', color: '#1a1a1a' }}>
                                 Comencemos
                             </h2>
                             <p style={{ fontSize: '14px', color:'#4a4a4a' }}>
@@ -131,13 +138,13 @@ function Login() {
                                 Nombre <span style={{ color: '#dc3545'}}>* </span>
                             </label>
                             <div className="position-relative">
-                                <span className="material-symbols outlined position-absolute"
+                                <span className="material-symbols-outlined position-absolute"
                                       style={{ left: '14px', top: '50%', transform: 'translateY(-50%)',
                                                color:'#727780', fontSize: '20px' }}>
                                     person
                                 </span>
                                 <input type="text"
-                                       className="forma-control py-3"
+                                       className="form-control py-3"
                                        placeholder="Juan"
                                        value={nombre}
                                        onChange={e => setNombre(e.target.value)}
@@ -153,13 +160,13 @@ function Login() {
                                 Apellidos
                             </label>
                             <div className="position-relative">
-                                <span className="material-symbols outlined position-absolute"
+                                <span className="material-symbols-outlined position-absolute"
                                       style={{ left: '14px', top: '50%', transform: 'translateY(-50%)',
                                                color:'#727780', fontSize: '20px' }}>
                                    person
                                 </span>
                                 <input type="text"
-                                       className="forma-control py-3"
+                                       className="form-control py-3"
                                        placeholder="Garcia Garcia"
                                        value={apellidos}
                                        onChange={e => setApellidos(e.target.value)}
@@ -175,7 +182,7 @@ function Login() {
                                 Correo Electrónico <span style={{ color: '#dc3545'}}>* </span>
                             </label>
                             <div className="position-relative">
-                                <span className="material-symbols outlined position-absolute"
+                                <span className="material-symbols-outlined position-absolute"
                                       style={{ left: '14px', top: '50%', transform: 'translateY(-50%)',
                                                color:'#727780', fontSize: '20px' }}>
                                     Email
@@ -197,9 +204,6 @@ function Login() {
                                    style={{ fontSize:'12px', color: '#4a4a4a', letterSpacing: '0.05em'}}>
                                 Contraseña
                             </label>
-                            <span style={{ fontSize: '12px', color:'#00677e', cursor: 'pointer'}}>
-                                ¿Olvidaste tu contraseña?
-                            </span>
                             </div>
                             <div className="position-relative">
                                 <span className="material-symbols-outlined position-absolute"
@@ -208,10 +212,10 @@ function Login() {
                                     lock
                                 </span>
                                 <input type={verPassword ? 'text' : 'password'}
-                                       className="forma-control py-3"
+                                       className="form-control py-3"
                                        placeholder="********"
                                        value={password}
-                                       onChange={e => setPassword(e.targeet.value)}
+                                       onChange={e => setPassword(e.target.value)}
                                        style={{ paddingLeft: '44px',
                                                 border: '1px solid #c1c7d0',
                                                 borderRadius: '8px' }} />
@@ -231,7 +235,7 @@ function Login() {
                                Telefono {' '} <span style={{ color: '#727780', transform: 'none', fontWeight: 'normal'}}>(opcional) </span>
                             </label>
                             <div className="position-relative">
-                                <span className="material-symbols outlined position-absolute"
+                                <span className="material-symbols-outlined position-absolute"
                                       style={{ left: '14px', top: '50%', transform: 'translateY(-50%)',
                                                color:'#727780', fontSize: '20px' }}>
                                     phone
@@ -253,7 +257,7 @@ function Login() {
                                Direccion {' '} <span style={{ color: '#727780', transform: 'none', fontWeight: 'normal'}}>(opcional) </span>
                             </label>
                             <div className="position-relative">
-                                <span className="material-symbols outlined position-absolute"
+                                <span className="material-symbols-outlined position-absolute"
                                       style={{ left: '14px', top: '50%', transform: 'translateY(-50%)',
                                                color:'#727780', fontSize: '20px' }}>
                                     home
@@ -305,4 +309,4 @@ function Login() {
     )
 
 }
-export default Login
+export default Registro

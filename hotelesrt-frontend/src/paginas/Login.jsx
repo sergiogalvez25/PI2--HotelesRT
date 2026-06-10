@@ -1,17 +1,18 @@
 
 
-
-
+import { Link, useNavigate } from "react-router-dom"
+import { useAutenticador } from "../context/AutenticadorContext"
+import autenticadorService from '../services/autenticadorService'
 // <>
 
 import { useState } from "react"
-
+import imgLogin from '../assets/imagenes-estaticas/img-login.png'
 
 function Login() {
 
 
     const navigate = useNavigate()
-    const { login } = useAuth()
+    const { login } = useAutenticador()
 
     const [email, setEmail] = useState('')
     const [ password, setPassword] = useState('')
@@ -24,7 +25,7 @@ function Login() {
 
 
 
-    const login = async() => {
+    const logearUsuario = async() => {
         if(!email || !password) {
             setError('Por favor rellena todos los campos')
             return
@@ -48,7 +49,7 @@ function Login() {
         <div className="d-flex" style={{ height: '100vh', overflow: 'hidden' }}>
             <div className="d-none d-lg-flex position-relative"
                  style={{ width:'50%', overflow: 'hidden'}}>
-                <img src="..." alt="..." className="w-100 h-100 object-fit-cover" />
+                <img src={imgLogin} alt="Hotel de Lujo" className="w-100 h-100 object-fit-cover" />
                 <div className="position-absolute bottom-0 start-0 w-100"
                      style={{ background: 'linear-gradient(to top, rgba(0,29,53,0.8) 0%, rgba(0,29,53,0.2) 60%, transparent 100%',
                               height: '100%' }}/>
@@ -97,7 +98,7 @@ function Login() {
                              style={{ width: '40px', height:'40px', backgroundColor: '#003358'}}>
                             <span className="material-symbols-outlined text-white"
                                   style={{ fontVariationSettings: "'FILL' 1"}}>
-                                apartamento
+                                hotel
                             </span>
                         </div>
                         <span className="fw-semibold" style={{ fontSize:'32px', color: '#003358'}}>
@@ -117,7 +118,7 @@ function Login() {
                                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)'}}>
                         <div className="mb-4 text-center text-lg-start">
                              <h2 className="fw-semibold"
-                                 style={{ ontSize: '32px', color: '#003358' }}>
+                                 style={{ fontSize: '32px', color: '#003358' }}>
                                 Bienvenido de nuevo
                             </h2>
                             <p style={{ fontSize: '14px', color:'#4a4a4a' }}>
@@ -135,16 +136,16 @@ function Login() {
                                 Correo Electrónico
                             </label>
                             <div className="position-relative">
-                                <span className="material-symbols outlined position-absolute"
+                                <span className="material-symbols-outlined position-absolute"
                                       style={{ left: '14px', top: '50%', transform: 'translateY(-50%)',
                                                color:'#727780', fontSize: '20px' }}>
                                     Email
                                 </span>
                                 <input type="email"
-                                       className="forma-control py-3"
+                                       className="form-control py-3"
                                        placeholder="nombre@ejemplo.com"
                                        value={email}
-                                       onChange={e => setEmail(e.targeet.value)}
+                                       onChange={e => setEmail(e.target.value)}
                                        style={{ paddingLeft: '44px',
                                                 border: '1px solid #c1c7d0',
                                                 borderRadius: '8px' }} />
@@ -167,11 +168,13 @@ function Login() {
                                                color:'#727780', fontSize: '20px' }}>
                                     lock
                                 </span>
+                                {/* type={verPassword ? 'text' : 'password'}*/}
+
                                 <input type={verPassword ? 'text' : 'password'}
-                                       className="forma-control py-3"
+                                       className="form-control py-3"
                                        placeholder="********"
                                        value={password}
-                                       onChange={e => setPassword(e.targeet.value)}
+                                       onChange={e => setPassword(e.target.value)}
                                        style={{ paddingLeft: '44px',
                                                 border: '1px solid #c1c7d0',
                                                 borderRadius: '8px' }} />
@@ -193,7 +196,7 @@ function Login() {
                             </label>
                         </div>
                          <button className="btn w-100 py-3 fw-semibold mb-4"
-                                 onClick={login}
+                                 onClick={logearUsuario}
                                  disabled={cargando}
                                  style={{backgroundColor:'#003358', color: 'white', borderRadius: '8px',
                                          fontSize: '16px' }}>
@@ -201,7 +204,7 @@ function Login() {
                         </button>                   
                         <p className="text-center mb-0" style={{ fontSize: '14px', color: '#4a4a4a' }}>
                             ¿No tienes cuenta?{' '}
-                            <Link to="/regisstro"
+                            <Link to="/registro"
                                   className="fw-semibold text-decoration-none"
                                   style={{color: '#00677e'}}>
                                 Regístrate gratis
@@ -209,7 +212,7 @@ function Login() {
                         </p> 
                     </div>
                 </div> 
-                <div className="d-fex flex-column flex-md-row justify-content-between align-items-center p-4 gap-3"
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center p-4 gap-3"
                      style={{ borderTop: '1px solid rgba(193,199,208,0.2)' }}>
                     <p className="mb-0" style={{fontSize: '14px', color: '#727780'}}>
                         2026 . Hoteles RT. Todos los derechos reservados.

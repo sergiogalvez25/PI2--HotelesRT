@@ -9,6 +9,7 @@ import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
+import com.hotelesrt.hotelesrt_backend.hotel.local.HabitacionRepository;
 import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporadaRepository;
 // <>
 @Service

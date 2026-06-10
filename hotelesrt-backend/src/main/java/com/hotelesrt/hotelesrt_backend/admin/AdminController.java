@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hotelesrt.hotelesrt_backend.autenticacion.JwtUtil;
+import com.hotelesrt.hotelesrt_backend.configuracion.HotelDataSourceContext;
+import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporada;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,75 +29,151 @@ import org.springframework.web.bind.annotation.RequestBody;
 // <>
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins= "http://localhost:3000")
 public class AdminController {
 
     @Autowired
     private AdminService adminService;
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    private void establecerContextoHotel(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        Long hotelId = jwtUtil.extraerHotelId(token);
+        HotelDataSourceContext.setHotelId(hotelId);
+    }
 
     // enlazar las funciones del service con los endpoints de las llamadas 
 
     // habitaciones
 
     @GetMapping("/habitaciones")
-    public ResponseEntity<?> listarHabitaciones() {
-        return ResponseEntity.ok(adminService.listarHabitaciones());
+    public ResponseEntity<?> listarHabitaciones(HttpServletRequest request) {
+        establecerContextoHotel(request);
+        try {
+            return ResponseEntity.ok(adminService.listarHabitaciones());
+        } finally{
+            HotelDataSourceContext.clear();
+        }
     }
     @PostMapping("/habitaciones")
     public ResponseEntity<?> crearHabitacion(
-            @Valid @RequestBody HabitacionRequest request) {
-        return ResponseEntity.ok(adminService.crearHabitacion(request));
+            @Valid @RequestBody HabitacionRequest request, HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            return ResponseEntity.ok(adminService.crearHabitacion(request));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
     }   
     
     @PutMapping("/habitaciones/{id}")
     public ResponseEntity<?> actualizarHabitacion(
             @PathVariable Long id,
-            @Valid @RequestBody HabitacionRequest request) {
-        return ResponseEntity.ok(adminService.actualizarHabitacion(id,request));
+            @Valid @RequestBody HabitacionRequest request, HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            return ResponseEntity.ok(adminService.actualizarHabitacion(id,request));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
     }
     @DeleteMapping("/habitaciones/{id}")
     public ResponseEntity<?> desactivarHabitacion(
-            @PathVariable Long id) {
+            @PathVariable Long id,  HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
         adminService.desactivarHabitacion(id);
         return ResponseEntity.ok("Habitacion desactivada correctamente");
+        } finally {
+            HotelDataSourceContext.clear();
+        }
         
     }
     // reservas
     @GetMapping("/reservas")
-    public ResponseEntity<?> listarreservas() {
-        return ResponseEntity.ok(adminService.listarReservas());
+    public ResponseEntity<?> listarReservas(HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        System.out.println("DEBUG Cargandio reservas del hotel con hotelId:" + HotelDataSourceContext.getHotelId());
+        try {
+            return ResponseEntity.ok(adminService.listarReservas());
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
     }
     @GetMapping("/reservas/rango")
     public ResponseEntity<?> reservasPorFecha(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                LocalDate fecha_inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                LocalDate fecha_fin) {
-        return ResponseEntity.ok(adminService.listarReservasPorFecha(fecha_inicio, fecha_fin));
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha_inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha_fin,
+            HttpServletRequest Httprequest) {
+        System.out.println("DEBUG FechaInicio: " + fecha_inicio);
+         System.out.println("DEBUG FechaFin: " + fecha_fin);
+        establecerContextoHotel(Httprequest);
+        try{
+            return ResponseEntity.ok(adminService.listarReservasPorFecha(fecha_inicio, fecha_fin));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
     }
 
     // gestion de precios
     @GetMapping("/precios/{habitacion_id}")
-    public ResponseEntity<?> listarPreciosTemporada(
-        @PathVariable Long habitacion_id) {
-        return ResponseEntity.ok(adminService.listarPreciosTemporada(habitacion_id));
+    public ResponseEntity<?> listarPreciosTemporada(@PathVariable Long habitacion_id, HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            return ResponseEntity.ok(adminService.listarPreciosTemporada(habitacion_id));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
+    }
+    @GetMapping("/precios")
+    public ResponseEntity<?> listarTodosPreciosTemporada(HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            return ResponseEntity.ok(adminService.listarTodosPreciosTemporada());
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
+    }
+    @PostMapping("/precios")
+    public ResponseEntity<?> crearPrecioTemporada(@RequestBody PrecioTemporada precioTemporada, HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            return ResponseEntity.ok(adminService.crearPrecioTemporada(precioTemporada));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
     }
 
 
     @PostMapping("/precios/{id}")
-    public ResponseEntity<?> eliminarPrecio(
-            @PathVariable Long id) {
-        adminService.eliminarPrecioTemporada(id);
-        return ResponseEntity.ok("Precio de temporada eliminado correctamente");
+    public ResponseEntity<?> eliminarPrecio(@PathVariable Long id, HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            adminService.eliminarPrecioTemporada(id);
+            return ResponseEntity.ok("Precio de temporada eliminado correctamente");
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
     }
     // Estadisticas
 
     @GetMapping("/estadisticas")
 
-    public ResponseEntity<Map<String, Object>> estadisticas(
-        @RequestParam Integer mes,
-        @RequestParam Integer year) {
-        return ResponseEntity.ok(adminService.obtenerEstadisticas(mes, year));
+    public ResponseEntity<Map<String, Object>> estadisticas(@RequestParam Integer mes, @RequestParam Integer year,
+                                                              HttpServletRequest Httprequest) {
+        establecerContextoHotel(Httprequest);
+        try {
+            return ResponseEntity.ok(adminService.obtenerEstadisticas(mes, year));
+        } finally {
+            HotelDataSourceContext.clear();
+        }
+        
     }
     
 

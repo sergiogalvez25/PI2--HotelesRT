@@ -1,7 +1,6 @@
 package com.hotelesrt.hotelesrt_backend.reservas;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
@@ -13,20 +12,19 @@ public class ReservaResponse {
     private Long cliente_id;
     private Long habitacion_id;
     private Long hotel_id;
-    private LocalDate fechaEntrada;
-    private LocalDate fechaSalida;
+    private String fechaEntrada;
+    private String fechaSalida;
     private EstadoReserva estado;
     private Double precioTotal;
     private Integer numPersonas;
     private String peticiones;
-    private LocalDate fechaCreacion;
+    private String fechaCreacion;
 
     public ReservaResponse(Reserva reserva, Long hotel_id) {
 
         this.id = reserva.getId();
-        this.cliente_id = reserva.getCliente_id();
-        this.habitacion_id = reserva.getHabitacion_id();
-        this.hotel_id = hotel_id;
+        this.cliente_id = reserva.getClienteId();
+        this.habitacion_id = reserva.getHabitacionId();
         this.fechaEntrada = reserva.getFechaEntrada();
         this.fechaSalida = reserva.getFechaSalida();
         this.estado = reserva.getEstado();
@@ -34,14 +32,6 @@ public class ReservaResponse {
         this.numPersonas = reserva.getNumPersonas();
         this.peticiones = reserva.getPeticiones();
         this.fechaCreacion = reserva.getFechaCreacion();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getCliente_id() {
@@ -68,19 +58,19 @@ public class ReservaResponse {
         this.hotel_id = hotel_id;
     }
 
-    public LocalDate getFechaEntrada() {
+    public String getFechaEntrada() {
         return fechaEntrada;
     }
 
-    public void setFechaEntrada(LocalDate fechaEntrada) {
+    public void setFechaEntrada(String fechaEntrada) {
         this.fechaEntrada = fechaEntrada;
     }
 
-    public LocalDate getFechaSalida() {
+    public String getFechaSalida() {
         return fechaSalida;
     }
 
-    public void setFechaSalida(LocalDate fechaSalida) {
+    public void setFechaSalida(String fechaSalida) {
         this.fechaSalida = fechaSalida;
     }
 
@@ -116,11 +106,11 @@ public class ReservaResponse {
         this.peticiones = peticiones;
     }
 
-    public LocalDate getFechaCreacion() {
+    public String getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(LocalDate fechaCreacion) {
+    public void setFechaCreacion(String fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
 

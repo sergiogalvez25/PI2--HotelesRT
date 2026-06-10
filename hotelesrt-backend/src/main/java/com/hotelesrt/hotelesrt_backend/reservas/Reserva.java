@@ -1,7 +1,9 @@
 package com.hotelesrt.hotelesrt_backend.reservas;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.*;
 
@@ -17,13 +19,13 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private Long cliente_id;
+    private Long clienteId;
     @Column(nullable = false)
-    private Long habitacion_id;
+    private Long habitacionId;
     @Column(nullable = false)
-    private LocalDate fechaEntrada;
+    private String fechaEntrada;
     @Column(nullable = false)
-    private LocalDate fechaSalida;
+    private String fechaSalida;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoReserva estado;
@@ -33,7 +35,7 @@ public class Reserva {
     private Integer numPersonas;
     private String peticiones;
     @Column(nullable = false)
-    private LocalDate fechaCreacion;
+    private String fechaCreacion;
 
     @Version
     private Long version;
@@ -46,35 +48,35 @@ public class Reserva {
         this.id = id;
     }
 
-    public Long getCliente_id() {
-        return cliente_id;
+    public Long getClienteId() {
+        return clienteId;
     }
 
-    public void setCliente_id(Long cliente_id) {
-        this.cliente_id = cliente_id;
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
     }
 
-    public Long getHabitacion_id() {
-        return habitacion_id;
+    public Long getHabitacionId() {
+        return habitacionId;
     }
 
-    public void setHabitacion_id(Long habitacion_id) {
-        this.habitacion_id = habitacion_id;
+    public void setHabitacionId(Long habitacionId) {
+        this.habitacionId = habitacionId;
     }
 
-    public LocalDate getFechaEntrada() {
+    public String getFechaEntrada() {
         return fechaEntrada;
     }
 
-    public void setFechaEntrada(LocalDate fechaEntrada) {
+    public void setFechaEntrada(String fechaEntrada) {
         this.fechaEntrada = fechaEntrada;
     }
 
-    public LocalDate getFechaSalida() {
+    public String getFechaSalida() {
         return fechaSalida;
     }
 
-    public void setFechaSalida(LocalDate fechaSalida) {
+    public void setFechaSalida(String fechaSalida) {
         this.fechaSalida = fechaSalida;
     }
 
@@ -110,11 +112,11 @@ public class Reserva {
         this.peticiones = peticiones;
     }
 
-    public LocalDate getFechaCreacion() {
+    public String getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(LocalDate fechaCreacion) {
+    public void setFechaCreacion(String fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
 

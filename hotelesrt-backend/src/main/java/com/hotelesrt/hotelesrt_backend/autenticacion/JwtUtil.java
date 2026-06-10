@@ -35,12 +35,15 @@ public class JwtUtil {
                 .claim("rol", usuario.getRol().name())
                 .claim("id", usuario.getId())
                 .claim("nombre", usuario.getNombre())
+                .claim("hotelId", usuario.getHotelId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
-
+    public Long extraerHotelId (String token) {
+        return extraerClaims(token).get("hotelId", Long.class);
+    }
     public String extraerEmail(String token) {
         return extraerClaims(token).getSubject();
     }

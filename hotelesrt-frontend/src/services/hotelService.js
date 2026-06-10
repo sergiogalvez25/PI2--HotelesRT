@@ -13,7 +13,7 @@ const hotelService = {
 
     //obtener detalle de un hotel
     obtenerHotel: async (id) => {
-        const response = await axios.get('`/api/hoteles/${id}')
+        const response = await axios.get(`/api/hoteles/${id}`)
         return response.data
     },
     buscarHoteles: async (ciudad, piscina, gimnasio, estrellas) => {
@@ -22,16 +22,16 @@ const hotelService = {
         })
         return response.data
     },
-    obtenerDisponibilidad: async (hotel_id, fecha_entrada, fecha_salida, personas) => {
-        const response = await axios.get(`/api/hoteles/${hotel_id}/disponibilidad`,{
-            params: {fecha_entrada, fecha_salida, personas}
+    obtenerDisponibilidad: async (hotelId, fechaEntrada, fechaSalida, personas) => {
+        const response = await axios.get(`/api/hoteles/${hotelId}/disponibilidad`,{
+            params: {fechaEntrada, fechaSalida, personas}
         })
         return response.data
     },
 
-    calcularPrecio: async (hotel_id, habitacion_id, fecha_entrada, fecha_salida) => {
-        const response = await axios.get(`/api/hoteles/${hotel_id}/habitaciones/${habitacion_id}/precio`,
-            { params: {fecha_entrada, fecha_salida}}
+    calcularPrecio: async (hotelId, habitacionId, fechaEntrada, fechaSalida) => {
+        const response = await axios.get(`/api/hoteles/${hotel_id}/habitaciones/${habitacionId}/precio`,
+            { params: {fechaEntrada, fechaSalida}}
         )
         return response.data
     }
