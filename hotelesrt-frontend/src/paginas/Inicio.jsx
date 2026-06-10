@@ -32,6 +32,9 @@ function Inicio() {
     const [cargando, setCargando] = useState(true)
     const [error, setError] = useState(null)
     const [slideActual, setSlideActual] = useState(0)
+    const [ofertas, setOfertas] = useState([])
+    const [emailNL, setEmailNL] = useState(false)
+    const [suscrito, setSuscrito] = useState(false)
 
     useEffect(() => {
         const cargarHoteles = async () => {
@@ -54,11 +57,25 @@ function Inicio() {
         return () => clearInterval(intervalo)
     }, [])
 
+    useEffect(() => {
+        const cargarOfertas = async () => {
+            try {
+                const data = await hotelService.obtenerOfertas()
+                setOfertas(data)
+            } catch (err) {
+                console.error('Error cargando ofertas: ', err)
+            }
+        }
+        cargarOfertas()
+    }, [])
 
-
-    // ofertas que luego se cargarán del backend 
-
-    const ofertas = []
+    const suscribirse = () => {
+        if(!emailNL || !emailNL.includes('@')) return
+        setSuscrito(true)
+        setEmailNL('')
+        setTimeout(() => setSuscrito(fallse), 4000)
+    }
+    
 
     return (
         <div style={{ backgroundColor: '#f8f9fa' }}>
@@ -170,42 +187,99 @@ function Inicio() {
             </p>
        </div>
     <div className="row g-4">
-        {ofertas.map(oferta =>(
-            <div key={oferta.id} className="col-12 col-lg-4"> 
-                <TarjetaReserva habitacion={oferta}/>
+        {ofertas.length === 0 ? (
+            <div className="col-12 text-center text-muted py-4">
+                <p>No hay ofertas disponibles en este momento</p>
             </div>
-        ))}
+        ) : ofertas.map((oferta, i) => {
+            const ciudades= { 1: 'Madrid', 2: 'Bilbao', 3: 'Sevilla' }
+            const descuento = Math.round((1 - oferta.precio / oferta.precioBase) * 100)
+            return (
+                <div key={i} className="col-12 col-md-6 col-lg-4">
+                    <div className="bg-white rounded-3 overflow-hidden"
+                         style={{ boxhadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                  border: '1px solid rgba(193,199,208,0.3)',
+                                  transition: 'transform 0.3s ease' }}
+                         onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+                         onMouseLeave={e => e.currentTarget.style.transform = 'tranlateY(0)'}>
+
+                    <div className="position-relative overflow-hidden" style={{ height: '180px'}}>
+                        <img src={`http://localhost:8080${oferta.imagenUrl?.replace('/imagenes','')}/1.jpg`} alt={oferta.tipo}
+                             className="w-100 h-100 objecti-fit-cover" />
+                        {descuento > 0 && (
+                            <span className="position-absolute top-0 end-0 m-2 px-2 py-1 rounded fw-bold"
+                                  style={{ backgroundColor: '#dc3545', color: 'white', fontSize: '12px'}}>
+                                -{descuento}%
+                            </span>
+                        )}
+                    </div>
+                    <div className="p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <span className="fw-bold text-uppercase" style={{color: '#00677e', fontSize: '11px', letterSpacing: '0.05em'}}>
+                                    {ciudades[oferta.hotelId]} - {oferta.tipo}
+                                </span>
+                                <p className="fw-semibold mb-0" style={{ color: '#1a1a1a', fontSize: '16px'}}>
+                                    {oferta.nombreTemporada}
+                                </p>
+                            </div>
+                        </div>
+                        <p className="mb-2" style={{color: '#727780', fontSize: '12px'}}>
+                            {oferta.fechaInicio} hasta {oferta.fechaFin}
+                        </p>
+                        <div className="d-flex align-items-baseline gap-2">
+                            <span className="fw-bold" style={{ color: '#003358', fontSize: '24px'}}>
+                                {oferta.precio} €
+                            </span>
+                            {descuento > 0 && (
+                                <span style={{ fontSize: '14px', color: '#727780', textDecoration: 'line-through' }}>
+                                    {oferta.precioBase} €
+                                </span>
+                            ) }
+                            <span style={{ fontSize:'12px', color: '#727780'}}> /noche</span>
+                        </div>
+                        <button className="btn w-100 mt-3 fw-semibold"
+                                onClick={() => navigate('/reservar')}
+                                style={{ backgroundColor: '#003358', color: 'white', borderRadius: '8px', fontSize: '14px'}}>
+                            Reservar Ahora
+                        </button>
+                    </div>
+                         </div>
+                </div>
+            )
+        })}
     </div>
    </div>
 </section>
 <section className="py-5 px-4 px-md-5"
          style={{ backgroundColor: '#003358' }}>
-    <div className="mx-auto text-center"
-         style={{ maxWidth:'896px' }}>
-        <h3 className="text-white fw-semibold mb-3"
-            style={{ fontSize: '32px' }}>
-            Suscribete para ofertas exclusivas
-        </h3>
-        <p className="text-white mb-5"
-            style={{ opacity: 0.8, fontSize: '16px' }}>
-            Recibe las ultimas noticias y nuestros descuentos especiales directamente en tu bandeja de entrada
-        </p>
-        <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+    <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+    {suscrito ? (
+        <div className="d-flex align-items-center gap-2 px-4 py-3 rounded-3" 
+             style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}>
+            <span className="material-symbols-outlined" style={{ color: '#5db8fe'}}>
+                check_circle
+            </span>
+            <span className="fw-semibold">¡Correo guardado correctamente!</span>
+        </div>
+    ) : (
+        <>
             <input type="email"
-                   placeholder="Tu correo electronico"
-                   className="form-control px-4 py-3"
-                   style={{ maxWidth:'400px',
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            color:'white',
-                            borderRadius:'8px' }} />
-            <button className="btn px-5 py-3 fw-semibold"
-                    style={{ backgroundColor: '#00677e',
+                    placeholder="Tu correo electrónico"
+                    className="form-control px-4 py-3"
+                    value={emailNL}
+                    onChange={e => setEmailNL(e.target.value)}
+                    style={{ maxWidth: '400px', backgroundColor: 'rgba(255,255,255,0.1)',
+                             border: '1px solid rgba(255,255,255,0.1)',
                              color: 'white',
-                             borderRadius:'8px' }}>
+                             borderRadius: '8px' }} />
+            <button className="btn px-5 py-3 fw-semibold"
+                    onClick={suscribirse}
+                    style={{ backgroundColor: '#00677e', color: 'white', borderRadius: '8px' }}>
                 Suscribirme
             </button>
-        </div>   
+        </>
+    )}
     </div>
 </section>
         </div>

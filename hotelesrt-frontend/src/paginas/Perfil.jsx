@@ -20,6 +20,7 @@ function Perfil() {
     const [reservas, setReservas] = useState([])
     const [cargando, setCargando] = useState(true)
     const [filtro, setFiltro] = useState('activas')
+    const [fotoPerfil, setFotoPerfil] = useState(localStorage.getItem('fotoPerfil') || null)
 
     useEffect(() => {
         console.log('Informacion usuario: ', usuario);
@@ -76,6 +77,18 @@ function Perfil() {
             default: return {backgroundColor: '#6c757d', color: 'white' }
         }
     }
+
+
+    const cambiarFoto = (e) => {
+        const file = e.target.files[0]
+        if(!file) return
+        const reader = new FileReader()
+        reader.onloadend = () => {
+            localStorage.setItem('fotoPerfil', reader.result)
+            setFotoPerfil(reader.result)
+        }
+        reader.readAsDataURL(file)
+    } 
     console.log('reservas: ', reservas)
     console.log('reservas Mostradas: ', reservasMostradas)
     console.log('cargando: ', cargando)
@@ -92,11 +105,19 @@ function Perfil() {
                             <div className="position-relative d-inline-block mb-4">
                                 <div className="rounded-circle overflow-hidden"
                                      style={{ width: '128px', height: '128px', border: '4px solid #d0e4ff', backgroundColor: '#e8f0fe'}}>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#003358' }}>
+                                    {fotoPerfil ? (
+                                        <img src={fotoPerfil} alt="Foto de Perfil" className="w-100 h-100 object-fit-cover" />
+                                    ): (
+                                        <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#003358' }}>
                                         person
-                                    </span>
+                                        </span>
+                                    )}
+                                    
                                 </div>
+                                <input type="file" id="inputFoto" accept="image/*" style={{ display: 'none' }}
+                                       onChange={cambiarFoto} />
                                 <button className="position-absolute bottom-0 end-0 btn rounded-circle p-1"
+                                        onClick={() => document.getElementById('inputFoto').click()}
                                         style={{ backgroundColor: '#003358',
                                                  color: 'white', width: '32px', height:'32px' }}>
                                     <span className="material-symbols-outlined"

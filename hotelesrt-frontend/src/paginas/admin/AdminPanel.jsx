@@ -44,7 +44,7 @@ function SeccionDashboard ({ stats, reservas, cargando }){
                 </div>
                 <button className="btn d-flex align-items-center gap-2 fw-semibold"
                         style={{ backgroundColor: '#003358', color:'white', borderRadius: '8px' }}>
-                    <span className="material-symbols-outlined"> Add</span>
+                    <span className="material-symbols-outlined"> add</span>
                     Nueva Reserva
                 </button>
             </div>
@@ -57,8 +57,8 @@ function SeccionDashboard ({ stats, reservas, cargando }){
                       bgIcon: '#b5ebff', colorIcon: '#00677e', trend:'+12%', up: true},
                     { icono: 'payments', label: 'Ingresos del Mes', valor: `${stats?.ingresosMes || 0} €`,
                       bgIcon: '#d2e6ef', colorIcon: '#21333a', trend:'+8%', up: true},
-                    { icono: 'analytics', label: 'Opupacion', valor: '84.5%',
-                      bgIcon: '#004a7c', colorIcon: '#87baf3', trend:'-1%', up: false}
+                    { icono: 'analytics', label: 'Opupacion', valor: `${stats?.pctOcupacion || 0} %`,
+                      bgIcon: '#004a7c', colorIcon: '#87baf3', trend: stats?.pctOcupacion > 80 ? '+' : '-' , up: stats?.pctOcupacion > 80}
                 ]. map((m,i) => (
                     <div key={i} className="col-12 col-md-6 col-lg-3">
                         <div className="bg-white rounded-3 p-4"
@@ -95,7 +95,7 @@ function SeccionDashboard ({ stats, reservas, cargando }){
                 <div className="bg-white rounded-3 overflow-hidden" style={{ flex: '0 0 70%',
                                                                              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
                                                                               border: '1px solid rgba(225, 227, 228, 0.5)'}}>
-                    <div className="d-flex justify-content-center align-items-center px-3 py-3"
+                    <div className="d-flex justify-content-between align-items-center px-3 py-3"
                          style={{ borderBottom: '1px solid rgba(225, 227, 228, 0.5)'}}>
                         <h3 className="fw-semibold mb-0" style={{fontSize: '24px', color: '#1a1a1a'}}>
                             Ultimas Reservas
@@ -136,10 +136,10 @@ function SeccionDashboard ({ stats, reservas, cargando }){
                                                     #{r.id}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    Cliente {r.cliente_id}
+                                                    Cliente {r.clienteId}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    Hab.  {r.habitacion_id}
+                                                    Hab.  {r.habitacionId}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     {r.fechaEntrada} --- {r.fechaSalida}
@@ -157,79 +157,64 @@ function SeccionDashboard ({ stats, reservas, cargando }){
 
 
 
-
-
-
-
-
                 <div className="d-flex flex-column gap-4" style={{ flex: 1}}>
+                    <div className="rounded-3 p-4 position-relative overflow-hidden" style={{backgroundColor: '#003358', color:'white' }}>
 
-                    <div className="bg-white rounded-3 p-4"
-                             style={{boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-                                     border: '1px solid rgba(225, 227, 228, 0.5)',
-                                     transition: 'transform 0.3s ease'}} >
-                    <h3 className="fw-semibold mb-4" style={{ fontSize: '24px', color: '#1a1a1a' }}>
-                        Estado de Limpieza
-                    </h3>
-
-                    {[
-                        {label: 'LIMPIAS' , valor: '82/124', pct:66, color: '#28a745'},
-                        {label: 'EN PROCESO' , valor: '15/124', pct:12, color: '#00677e'},
-                        {label: 'PENDIENTES' , valor: '27/124', pct:22, color: '#dc3545'}
-                    ].map(b=> (
-                        <div key={b.label} className="mb-3">
-                            <div className="d-flex justify-content-between mb-1">
-                                <span className="fw-bold" style={{ fontSize: '12px', letterSpacing:'0.05em'}}>
-                                    {b.label}
-                                </span>
-                                <span className="fw-bold" style={{ fontSize: '12px',color: b.color}}>
-                                    {b.valor}
-                                </span>
-                            </div>
-                            <div className="rounded-pill overflow-hidden" style={{ height:'8px', backgroundColor:'#f8f9fa'}}>
-                                <div style={{ width: `${b.pct}`, height: '100%', backgroundColor: b.color}}>
-
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                    </div>  
-
-
-
-                    <div className="rounded-3 p-4 position-relative overflow-hidden" 
-                         style={{ backgroundColor: '#003358', color: 'white'}}>
-                        <h3 className="fw-medium mb-4" style={{ fontSize: '18px' }}>
-                        Proximas LLegadas
+                        <h3 className="fw-medium mb-4" style={{ fontSize: '18px'}}>
+                            Próximas Llegadas
                         </h3>
-                        <div className="d-flex flex-column gap-3">
-                            {[
-                                {hora: '14:00', nombre: 'Elena Rodriguez', hab: 'Suite Real'},
-                                {hora: '15:30', nombre: 'Francisco Peña', hab: 'Doble Vista Mar'}
+                        {stats?.proximasLlegadas?.length === 0 ? (
+                            <p style={{ fontSize: '14px', opacity: 0.7 }}>No hay llegadas hoy</p>
+                        ) : (
+                            <div className="d-flex flex-column gap-3">
+                                {stats?.proximasLlegadas?.map((l,i) => (
+                                    <div key={i} className="d-flex align-items-center gap-3">
+                                        <div className="rounded-circle flex-shrink-0" style={{width: '8px', height: '8px', backgroundColor: '#5db8fe' }}/>
+                                        <div>
+                                            <p className="fw-bold mb-0" style={{ fontSize:'12px', letterSpacing:'0.05em'}}>
+                                                {l.hora} - Cliente {l.clienteId} -- Hab. {l.habitacionId}
+                                            </p>
+                                            <p className="mb-0" style={{ fontSize: '11px', opacity: 0.7 }}>
+                                                Check-in -- {l.noches} noche{l.noches !== 1 ? 's' : ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="rounded-3 p-4 position-relative overflow-hidden" style={{backgroundColor: '#00677e', color:'white' }}>
 
-                            ].map((l,i) => (
-                                <div key={i}
-                                     className="d-flex align-items-center gap-3">
-                                    <div className="rounded-circle flex-shrink-0"
-                                         style={{width:'8px', height:'8px', backgroundColor: '#5db8fe'}} />
-                                            <div>
-                                                <p className="fw-bold mb-0" style={{ fontSize:'12px', letterSpacing: '0.05em'}}>
-                                                    {l.hora} - {l.nombre}
-                                                 </p>
-                                                 <p className="mb-0" style={{ fontSize: '11px', opacity: 0.7 }}>
-                                                    Check-in {l.hab}
-                                                 </p>
-                                            </div>
-                                         
-                                     </div>
-                            ))}
-                            </div>        
-                            <button className="btn w-100 mt-4 fw-semibold"
-                                    style={{ backgroundColor: 'white', color: '#003358', borderRadius: '8px', fontSize: '14px'}}>
-                                Ver Horarios
-                                </button>
-                    </div> 
+                        <h3 className="fw-medium mb-4" style={{ fontSize: '18px'}}>
+                            Próximas Salidas
+                        </h3>
+                        {stats?.proximasSalidas?.length === 0 ? (
+                            <p style={{ fontSize: '14px', opacity: 0.7 }}>No hay salidas hoy</p>
+                        ) : (
+                            <div className="d-flex flex-column gap-3">
+                                {stats?.proximasSalidas?.map((s,i) => (
+                                    <div key={i} className="d-flex align-items-center gap-3">
+                                        <div className="rounded-circle flex-shrink-0" style={{width: '8px', height: '8px', backgroundColor: '#b5ebff' }}/>
+                                        <div>
+                                            <p className="fw-bold mb-0" style={{ fontSize:'12px', letterSpacing:'0.05em'}}>
+                                                {l.hora} - Cliente {l.clienteId} -- Hab. {l.habitacionId}
+                                            </p>
+                                            <p className="mb-0" style={{ fontSize: '11px', opacity: 0.7 }}>
+                                                Check-out -- {l.noches} noche{l.noches !== 1 ? 's' : ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                      
+                    </div>
                 </div>
+
+
+
+
+                
             </div>
             
 
@@ -312,6 +297,12 @@ function AdminPanel(){
                             </p>
                          </div>
                 </div>
+                <button className="btn d-flex align-items-center gap-3 p-3 text-start w-100 mb-2 fw-semibold"
+                        onClick={() => navigate('/') }
+                        style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: 'white', borderRadius: '8px', fontSize: '14px', }}>
+                        <span className="material-symbols-outlined" style={{color: 'white'}}>home</span>
+                        Ir al Inicio
+                </button>
                 <nav className="d-flex flex-column gap-1 flex-grow-1">
                     {menuItems.map(item => (
                         <button key={item.id}
@@ -336,7 +327,7 @@ function AdminPanel(){
                 </nav>
                 <div className="mt-auto pt-3" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
                     <div className="d-flex align-items-center gap-3 p-2">
-                        <div className="rounder-cirlce d-flex align-items-center justify-content-center"
+                        <div className="rounded-cirlce d-flex align-items-center justify-content-center"
                              style={{ width: '32px', height:'32px', backgroundColor: '#00677e'}}>
                                 <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'white' }}>
                                     person
@@ -355,7 +346,7 @@ function AdminPanel(){
                 </div>
             </aside>
 
-            <main className="d-flex flex-column flex-grow-1 overflow-auto" style={{ backgroundColor: 'f8f9fa' }}>
+            <main className="d-flex flex-column flex-grow-1 overflow-auto" style={{ backgroundColor: '#f8f9fa' }}>
                 <header className="d-flex justify-content-between align-items-center px-4 py-3 bg-white"
                         style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)', position: 'sticky', top:0, zIndex: 10}}>
                     <div className="position-relative" style={{ maxWidth: '400px', width: '100%' }}>
@@ -370,7 +361,7 @@ function AdminPanel(){
                                style={{ paddingLeft: '40px', backgroundColor: '#f8f9fa', border:'none', borderRadius: '8px'}} />
                     </div>
                     <div className="d-flex align-items-center gap-3">
-                        {['notificaciones', 'ayuda', 'ajustes'].map(icon => (
+                        {['notifications', 'help', 'settings'].map(icon => (
                             <button key={icon}
                                     className="btn p-1"
                                     style={{ color: '#4a4a4a'}}>
@@ -427,7 +418,8 @@ function SeccionReservas({ reservas, cargando }){
     const [fechaSalida, setFechaSalida] = useState('')
     const [estadoFiltro, setEstadoFiltro] = useState('')
     const [reservasFiltradas, setReservasFiltradas] = useState(reservas)
-
+    const [paginaActual, setPaginaActual] = useState(1)
+    
     useEffect(() => {
         setReservasFiltradas(reservas)
     }, [reservas])
@@ -447,9 +439,29 @@ function SeccionReservas({ reservas, cargando }){
 
     const reservasMostradas = estadoFiltro ? reservasFiltradas.filter(r => r.estado === estadoFiltro) : reservasFiltradas
 
+
+
+
+    const ITEMS_POR_PAGINA = 5
+    const reservasPaginadas= reservasMostradas.slice((paginaActual - 1) *   ITEMS_POR_PAGINA, paginaActual * ITEMS_POR_PAGINA)
+    const totalPaginas= Math.ceil(reservasMostradas.length / ITEMS_POR_PAGINA)
+
+
+
+
+    const exportarJSON = () => {
+        const json = JSON.stringify(reservasMostradas, null, 2)
+        const blob = new Blob([json], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `reservas_${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+    }
     return (
         <div className="d-flex flex-column gap-4">
-            <div className="d-flex flex-column flex-md-row justify-content-betweem align-items-center gap-3">
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <div>
                     <h1 className="fw-semibold mb-1" style={{fontSize:'32px', color:'#1a1a1a'}}>
                         Gestión de Reservas
@@ -460,14 +472,10 @@ function SeccionReservas({ reservas, cargando }){
                 </div>
                 <div className="d-flex gap-2">
                     <button className="btn d-flex align-items-center gap-2 fw-semibold"
-                            style={{ backgroundColor:'#003358', color: 'white', borderRadius:'8px' }}>
-                        <span className="material-symbols-outlined">add</span>
-                        Nueva Reserva
-                    </button>
-                    <button className="btn d-flex align-items-center gap-2 fw-semibold"
+                            onClick={exportarJSON}
                             style={{border: '1px solid #003358', color: '#003358', borderRadius:'8px' }}>
                         <span className="material-symbols-outlined">download</span>
-                        Exportar
+                        Exportar JSON
                     </button>
                 </div>
             </div>
@@ -560,7 +568,7 @@ function SeccionReservas({ reservas, cargando }){
                                             No hay reservas
                                             </td>
                                     </tr>
-                                ) : reservasMostradas.map(r => (
+                                ) : reservasPaginadas.map(r => (
                                     <tr key={r.id}>
                                         <td className="px-4 py-3 fw-bold" style={{  fontSize: '12px',
                                                      color:'#4a4a4a',
@@ -573,7 +581,7 @@ function SeccionReservas({ reservas, cargando }){
                                                      style={{width:'32px', height: '32px', backgroundColor: '#b5ebff', fontSize: '12px', color: '#001f28'}}>
                                                     {r.clienteId}
                                                 </div>
-                                                <span>Cliente {r.nombre}</span>
+                                                <span>Cliente {r.clienteId}</span>
                                             </div>
                                           </td>
                                           <td className="px-4 py-3">
@@ -590,7 +598,7 @@ function SeccionReservas({ reservas, cargando }){
                                             <ColorEstado estado={r.estado}/>
                                           </td>
                                           <td className="px-4 py-3 fw-semibold" style={{fontSize: '18px', color: '#003358' }}>
-                                            {r.PrecioTotal} €
+                                            {r.precioTotal} €
                                             
                                           </td>
                                           <td className="px-4 py-3 text-end">
@@ -605,24 +613,30 @@ function SeccionReservas({ reservas, cargando }){
                             </tbody>
                         </table>
                     </div>
-                    <div className="d-flex justify-content-betweem align-items-center px-4 py-3"
+                    <div className="d-flex justify-content-between align-items-center px-4 py-3"
                          style={{ borderTop: '1px solid #e1e3e4', backgroundColor: '#f8f9fa' }}>
                         <span style={{ fontSize: '14px', color: '#4a4a4a'}}>
-                            Mostrando {reservasMostradas.length} reservas
+                            Mostrando {reservasPaginadas.length} de {reservasMostradas.length} reservas
                         </span>
                         <div className="d-flex align-items-center gap-2">
-                            <button className="btn p-2" style={{ border:'1px solid #c1c7d0', borderRadius: '8px'}}>
+                            <button className="btn p-2"
+                                    disabled={paginaActual === 1}
+                                    onClick={() => setPaginaActual(prev => prev -1)}
+                                    style={{ border:'1px solid #c1c7d0', borderRadius: '8px'}}>
                                 <span className="material-symbols-outlined">
                                     chevron_left
                                 </span>
                             </button>
                             <button className="btn fw-bold" style={{ width: '40px', height:'40px',
                                                                     backgroundColor:'#003358', color:'white', borderRadius:'8px'}}>
-
+                                    {paginaActual}
                             </button>
-                                <button className="btn p-2" style={{ border:'1px solid #c1c7d0', borderRadius: '8px'}}>
+                                <button className="btn p-2"
+                                        disabled={paginaActual === totalPaginas}
+                                        onClick={() => setPaginaActual(prev => prev + 1)}
+                                        style={{ border:'1px solid #c1c7d0', borderRadius: '8px'}}>
                                 <span className="material-symbols-outlined">
-                                    chevron_left
+                                    chevron_right
                                 </span>
                             </button>
                         </div>
@@ -646,15 +660,28 @@ function SeccionHabitaciones(){
 
 
     const[numero, setNumero] = useState('')
-    const [tipo, setTipo] = useState('INDIVIDUAL')
+    const [tipo, setTipo] = useState('DOBLE')
     const [capacidad, setCapacidad] = useState(2)
     const [precioNoche, setPrecioNoche] = useState('')
     const[imagenUrl, setImagenUrl] = useState('')
     const [descripcion, setDescripcion] = useState('')
     const [error, setError] = useState('')
 
+    const [paginasPorTipo, setPaginasPorTipo] = useState({DOBLE: 1, DOBLEM: 1, FAMILIAR: 1, SUITE:1})
 
+    const ITEMS_POR_PAGINA = 3
 
+    const obtenerHabitacionesPorTipo = (tipo) => {
+        const delTipo = habitaciones.filter(h => h.tipo === tipo)
+        const pagina = paginasPorTipo[tipo] || 1
+        const inicio = (pagina - 1) * ITEMS_POR_PAGINA
+        return {
+            items: delTipo.slice(inicio, inicio + ITEMS_POR_PAGINA),
+            total: delTipo.length, 
+            totalPaginas: Math.ceil(delTipo.length / ITEMS_POR_PAGINA),
+            pagina
+        }
+    }
 
     useEffect(()=> {
         cargarHabitaciones()
@@ -673,7 +700,7 @@ function SeccionHabitaciones(){
     const abrirFormNuevo= () => {
         setHabitacionEditando(null)
         setNumero('')
-        setTipo('INDIVIDUAL')
+        setTipo('DOBLE')
         setCapacidad(2)
         setPrecioNoche('')
         setImagenUrl('')
@@ -719,6 +746,7 @@ function SeccionHabitaciones(){
             console.error('Error desactivando habitación:', err)
         }
     }
+
     return (
     <div className="d-flex flex-column gap-4">
         <div className="d-flex justify-content-between align-items-center">
@@ -731,115 +759,99 @@ function SeccionHabitaciones(){
                 <span className="material-symbols-outlined">
                     add
                 </span>
-                Nuev Habitación
+                Nueva Habitación
                     </button>
         </div>
         <div className="d-flex gap-4 align-items-start">
             <div className="bg-white rounded-3 overflow-hidden flex-grow-1"
-                 style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid rgba(25,22,228,0.5)'}}>
+                 style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.04)', border: '1px solid rgba(193,199,208,0.5)'}}>
+            
+
                 {cargando ? <Loader /> : (
-                    <>
-                    <div className="table-responsive">
-                        <table className="table table-hover mb-0">
-                            <thead style={{ backgroundColor: '#f3f4f5'}}>
-                                <tr>
-                                    {['Imagen', 'Numero', 'Tipo', 'Capacidad', 'Precio/Noche', 'Estado', 'Acciones']. map(h => (
-                                        <th key={h}
-                                            className="px-4 py-3 fw-bold text-uppercase"
-                                            style={{ fontSize: '12px', color: '#4a4a4a', letterSpacing: '0.05em'}}>
-                                        {h}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody style={{ fontSize: '14px' }}>
-                                {habitaciones.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="7"
-                                            className="text-center py-4 text-muted">
-                                            No hay Habitaciones
-                                        </td>
-                                    </tr>
-                                ) : habitaciones.map(hab => (
-                                    <tr key={hab.id}>
-                                        <td className="px-4 py-3">
-                                            <div className="rounded-2 overflow-hidden"
-                                                 style={{ width:'64px', height: '40px', backgroundColor: '#d9dadb'}}>
-                                                {hab.imagenUrl && ( 
-                                                    <img src={`http://localhost:8080${hab.imagenUrl.replace('/imagenes', '')}/1.jpg`} alt={hab.numero} className="w-100 h-100 object-fit-cover" />
-                                                )}
-                                                 </div>
-                                        </td>
-                                        <td className="px-4 py-3 fw-medium" style={{ fontSize: '18px'}}>
-                                            {hab.numero}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {hab.tipo}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {hab.capacidad} pers.
-                                        </td>
-                                        <td className="px-4 py-3 fw-semibold" style={{ fontSize: '16px', color:'#003358'}}>
-                                            {hab.precioNoche} €
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className="px-2 py-1 rounded-pill fw-bold"
-                                                  style={{ fontSize:'12px', 
-                                                           backgroundColor: hab.disponible
-                                                            ? 'rgba(40,167,69,0.1)'
-                                                            : 'rgba(74,74,74,0.1)',
-                                                          color: hab.disponible
-                                                            ? '#28a745' : '#4a4a4a'}}>
-                                                {hab.disponible ? 'Activa' : 'Inactiva'}
-                                                </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="d-flex gap-1">
-                                                <button className="btn p-1"
-                                                        onClick={() => abrirFormEditar(hab)}
-                                                        style={{ color: '#003358'}}>
-                                                    <span className="material-symbols-outlined">
-                                                        edit
-                                                    </span>
-                                                </button>
-                                                <button className="btn p-1"
-                                                        onClick={() => desactivar(hab.id)}
-                                                        style={{ color: hab.disponible ? '#dc3545' : '#28a745'}}>
-                                                    <span className="material-symbols-outlined">
-                                                        {hab.disponible ? 'visibility_off' : 'visibility'}
-                                                    </span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="d-flex flex-column">
+                        {['DOBLE', 'DOBLEM', 'FAMILIAR', 'SUITE'].map(tipo => {
+                            const {items, total, totalPaginas, pagina} = obtenerHabitacionesPorTipo(tipo)
+                            if(total === 0) return null
+                            const labels = {DOBLE: 'Doble Twin', DOBLEM: 'Doble', FAMILIAR: 'Familia', SUITE: 'Suite'}
+                            return (
+                                <div key={tipo} className="mb-2">
+                                    <div className="d-flex justify-content-between align-items-center px-4 py-3"
+                                         style={{backgroundColor: '#f3f4f5', borderBottom: '1px solid #e1e3e4'}}>
+                                        <div className="d-flex align-items-center gap-2">
+                                            <span className="fw-bold text-uppercase" style={{ fontSize:'14px', color:'#003358'}}>
+                                            {labels[tipo]}
+                                            </span>
+                                            <span className="px-2 py-0 rounded-pill fw-bold" style={{ fontSize:'11px', backgroundColor: '#e8f0fe', color: '#003358'}}>
+                                            {total} habitaciones
+                                            </span>
+                                        </div>
+                                        <div className="d-flex align-items-center gap-2">
+                                            <span style={{ fontSize:'12px', color:'#4a4a4a'}}>
+                                                Pág {pagina} de {totalPaginas}
+                                            </span>
+                                            <button className="btn p-1" disabled={pagina === 1}
+                                                    onClick={() => setPaginasPorTipo(prev => ({...prev, [tipo]: pagina - 1}))}
+                                                    style={{ border: '1px solid #c1c7d0', borderRadius: '6px', width: '28px', height: '28px' }}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '16px'}}>chevron_left</span>
+                                            </button>
+                                            <button className="btn p-1" disabled={pagina === totalPaginas}
+                                                    onClick={() => setPaginasPorTipo(prev => ({...prev, [tipo]: pagina + 1}))}
+                                                    style={{ border: '1px solid #c1c7d0', borderRadius: '6px', width: '28px', height: '28px' }}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '16px'}}>chevron_right</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <table className="table table-hover mb-0">
+                                        <tbody style={{ fontSize: '14px' }}>
+                                            {items.map(hab => (
+                                                <tr key={hab.id}>
+                                                    <td className="px-4 py-3">
+                                                        <div className="rounded-2 overflow-hidden"
+                                                             style={{ width: '64px', height:'40px', backgroundColor: '#d9dadb'}}>
+                                                            {hab.imagenUrl && (
+                                                                <img src={`http://localhost:8080${hab.imagenUrl.replace('/imagenes', '')}/1.jpg`} alt={hab.numero}
+                                                                     className="w-100 h-100 object-fit-cover" />
+                                                            )}
+                                                             </div>
+                                                    </td>
+                                                    <td className=" py-3 fw-medium" style={{ fontSize: '18px' }}>
+                                                        {hab.numero}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        {hab.capacidad} pers.
+                                                    </td>
+                                                    <td className="px-4 py-3 fw-semibold" style={{fontSize: '16px', color: '#003358'}}>
+                                                        {hab.precioNoche} €
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-1 rounded-pill fw-bold" style={{ fontSize: '12px',
+                                                                                                                  backgroundColor: hab.disponible ? 'rgba(40,167,69,0.1)' : 'rgba(74,74,74,0.1)',
+                                                                                                                  color: hab.disponible ? '#28a745' : '#4a4a4a' }}>
+                                                            {hab.disponible ? 'Acitva' : 'Inactiva'}                                                        
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="d-flex gap-1">
+                                                            <button className="btn p-1" onClick={() => abrirFormEditar(hab) }
+                                                                    style={{ color: '#003358' }}>
+                                                                <span className="material-symbols-outlined">edit</span>
+                                                            </button>
+                                                            <button className="btn p-1" onClick={() => desactivar(hab.id) }
+                                                                    style={{ color: hab.disponible ? '#dc3545' :  '#28a745'}}>
+                                                                <span className="material-symbols-outlined">
+                                                                    {hab.disponible ? 'visibility_off' : 'visibility'}
+                                                                </span>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )
+                        })}
                     </div>
-                    <div className="d-flex justify-content-between align-items-center px-4 py-3"
-                         style={{ borderTop: '1px solid #e1e3e4', backgroundColor: '#f8f9fa', fontSize:'14px', color: '#4a4a4a' }}>
-                        <span>Mostrando {habitaciones.length} habitaciones</span>
-                        <div className="d-flex gap-2">
-                            <button className="btn p-1" style={{ border: '1px solid #c1c7d0', borderRadius: '6px', 
-                                                                 width: '32px', height: '32px' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                    chevron_left
-                                </span>                            
-                            </button>
-                            <button className="btn fw-bold" style={{ width: '32px', height: '32px',
-                                                                     backgroundColor: '#003358', color: 'white', 
-                                                                     borderRadius:'6px', padding: 0}}>
-                                1
-                            </button>
-                            <button className="btn p-1"
-                                    style={{ border: '1px solid #c1c7d0', borderRadius: '6px', width: '32px', height: '32px' }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '18px'}}>
-                                    chevron_right
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                    </>
                 )}
                  </div>
 
@@ -877,21 +889,6 @@ function SeccionHabitaciones(){
                                          {error}
                                     </div>
                                 )}
-                                <div className="rounded-2 d-flex align-items-center justify-content-center overflow-hidden"
-                                     style={{ width: '100%', height: '160px', backgroundColor:'#f3f4f5', border: '2px dashed #c1c7d0' }}>
-                                   {imagenUrl ? (
-                                    <img src={imagenUrl} alt="Preview" className="w-100 h-100 object-fit-cover" />
-                                   ) : (
-                                    <div className="text-center text-muted">
-                                        <span className="material-symbols-outlined d-block" style={{ fontSize: '36px'}}>
-                                            add_a_photo
-                                        </span>
-                                        <p style={{ fontSize:'12px' }}>
-                                            Añade una URL de imagen
-                                        </p>
-                                    </div>
-                                   )}     
-                                </div>
                                 <div className="row g-2">
                                     <div className="col-6">
                                         <label className="fw-bold text-uppercase d-block mb-1" style={{ fontSize: '12px', color: '#4a4a4a', letterSpacing: '0.05em'}}>
@@ -1187,6 +1184,9 @@ function SeccionPrecios() {
                                             <p className="mb-0" style={{fontSize:'12px', color:'#4a4a4a'}}>
                                             {p.fechaFin}
                                             </p>
+                                        </td>
+                                        <td className="px-4 py-3 fw-semibold" style={{ fontSize: '16px', color: '#003358'}}>
+                                            {p.precio} €
                                         </td>
                                         <td className="px-4 py-3">
                                             <button className="btn p-1 rounded-circle"

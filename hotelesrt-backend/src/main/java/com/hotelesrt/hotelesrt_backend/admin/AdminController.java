@@ -1,6 +1,9 @@
 package com.hotelesrt.hotelesrt_backend.admin;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hotelesrt.hotelesrt_backend.autenticacion.JwtUtil;
 import com.hotelesrt.hotelesrt_backend.configuracion.HotelDataSourceContext;
+import com.hotelesrt.hotelesrt_backend.hotel.local.Habitacion;
+import com.hotelesrt.hotelesrt_backend.hotel.local.HabitacionRepository;
 import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporada;
+import com.hotelesrt.hotelesrt_backend.reservas.PrecioTemporadaRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -35,6 +41,12 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private PrecioTemporadaRepository precioTemporadaRepository;
+
+    @Autowired
+    private HabitacionRepository habitacionRepository;
 
     private void establecerContextoHotel(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
@@ -83,7 +95,7 @@ public class AdminController {
             @PathVariable Long id,  HttpServletRequest Httprequest) {
         establecerContextoHotel(Httprequest);
         try {
-        adminService.desactivarHabitacion(id);
+        adminService.toggleHabitacion(id);
         return ResponseEntity.ok("Habitacion desactivada correctamente");
         } finally {
             HotelDataSourceContext.clear();
@@ -150,7 +162,7 @@ public class AdminController {
     }
 
 
-    @PostMapping("/precios/{id}")
+    @DeleteMapping("/precios/{id}")
     public ResponseEntity<?> eliminarPrecio(@PathVariable Long id, HttpServletRequest Httprequest) {
         establecerContextoHotel(Httprequest);
         try {
@@ -160,6 +172,41 @@ public class AdminController {
             HotelDataSourceContext.clear();
         }
         
+    }
+
+// ultimas oportunidades
+
+    @GetMapping("/precios/todos")
+    public ResponseEntity<?> listarTodosPreciosGlobal(HttpServletRequest Httprequest) {
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        Long[] hotelIds = {1L, 2L, 3L};
+
+        for (Long hotelId: hotelIds) {
+            HotelDataSourceContext.setHotelId(hotelId);
+            try {
+                List<PrecioTemporada> precios = precioTemporadaRepository.findAll();
+                for(PrecioTemporada p : precios) {
+                    Habitacion hab = habitacionRepository.findById(p.getHabitacionId()).orElse(null);
+                    if(hab != null) {
+                        Map<String, Object> descuento = new HashMap<>();
+                        descuento.put("id", p.getId());
+                        descuento.put("hotelId", hotelId);
+                        descuento.put("NombreTemporada", p.getNombreTemporada());
+                        descuento.put ("fechaInicio", p.getFechaInicio());
+                        descuento.put("fechaFin", p.getFechaFin());
+                        descuento.put("precio", p.getPrecio());
+                        descuento.put("precioBase", hab.getPrecioNoche());
+                        descuento.put("tipo", hab.getTipo());
+                        descuento.put("descripcion", hab.getDescripcion());
+                        descuento.put("imagenUrl", hab.getImagenUrl());
+                        resultado.add(descuento);
+                    }
+                }
+            } finally {
+                HotelDataSourceContext.clear();
+            }
+        }
+        return ResponseEntity.ok(resultado);
     }
     // Estadisticas
 

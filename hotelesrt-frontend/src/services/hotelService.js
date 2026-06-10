@@ -34,6 +34,10 @@ const hotelService = {
             { params: {fechaEntrada, fechaSalida}}
         )
         return response.data
+    },
+    obtenerOfertas: async () => {
+        const response = await axios.get('/api/admin/precios/todos')
+        return response.data
     }
 }
 export default hotelService

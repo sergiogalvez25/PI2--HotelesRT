@@ -60,6 +60,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/hoteles/**").permitAll()
                 .requestMatchers("/imagenes/**").permitAll()
                 .requestMatchers("/**/*.jpg", "/**/*.png", "/**/*.jpeg").permitAll()
+                .requestMatchers("api/admin/precios/todos").permitAll()
 
                 // Rutas solo para ADMIN_HOTEL
                 .requestMatchers("/api/admin/**")

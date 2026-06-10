@@ -66,11 +66,11 @@ public class AdminService {
 
         return habitacionRepository.save(habitacion);
     }
-    public void desactivarHabitacion(Long id) {
+    public void toggleHabitacion(Long id) {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(
                     "Habitacion no encontrada"));
-        habitacion.setDisponible(false);
+        habitacion.setDisponible(!habitacion.isDisponible());
         habitacionRepository.save(habitacion);
     }
 
@@ -109,16 +109,113 @@ public class AdminService {
 
     public Map<String, Object> obtenerEstadisticas(Integer mes, Integer year){
         Double ingresos = reservaRepository.calcularIngresosMes(mes, year);
+        List<Reserva> todasReservas = reservaRepository.findAll();
+        List<Habitacion> todasHabitaciones = habitacionRepository.findAll();
+        long totalHabitaciones = todasHabitaciones.stream().filter(h -> h.isDisponible()).count();
+        long totalReservas = todasReservas.stream()
+            .filter(r -> r.getEstado() == EstadoReserva.CONFIRMADA)
+            .filter(r-> {
+                try {
+                    LocalDate entrada = LocalDate.parse(r.getFechaEntrada());
+                    return entrada.getMonthValue() == mes && entrada.getYear() == year;
+                } catch(Exception e) {
+                    return false;
+                }
+            })
+            .count();
+        LocalDate hoy = LocalDate.now();
+        long reservasActivas = todasReservas.stream()
+            .filter(r -> r.getEstado() == EstadoReserva.CONFIRMADA)
+            .filter(r-> {
+                try {
+                    LocalDate salida = LocalDate.parse(r.getFechaSalida());
+                    return !salida.isBefore(hoy);
+                } catch(Exception e) {
+                    return false;
+                }
+            })
+            .count();
+        long habitacionesOcupadasHoy = todasReservas.stream()
+            .filter(r -> r.getEstado() == EstadoReserva.CONFIRMADA)
+            .filter(r-> {
+                try {
+                    LocalDate entrada = LocalDate.parse(r.getFechaEntrada());
+                    LocalDate salida = LocalDate.parse(r.getFechaSalida());
+                    return !entrada.isAfter(hoy) && salida.isAfter(hoy);
+                } catch(Exception e) {
+                    return false;
+                }
+            })
+            .count();
 
-        List<Reserva> reservasMes = reservaRepository.findReservasEnRango(
-            (LocalDate.of(year,mes, 1)).toString(),
-            (LocalDate.of(year, mes, LocalDate.of(year,mes, 1).lengthOfMonth())).toString());
+        double pctOcupacion = totalHabitaciones > 0 ? Math.round((habitacionesOcupadasHoy *100.0 / totalHabitaciones) *10.0) / 10.0 : 0.0;
+
+
+        
         
         Map<String, Object> estadisticas = new HashMap<>();
-        estadisticas.put("ingresosMes", ingresos);
-        estadisticas.put("totalReservas", reservasMes.size());
+        estadisticas.put("ingresosMes", ingresos != null ? ingresos : 0);
+        estadisticas.put("totalReservas", totalReservas);
+        estadisticas.put("totalHabitaciones", totalHabitaciones);
+        estadisticas.put("reservasActivas", reservasActivas);
+        estadisticas.put("pctOcupacion", pctOcupacion);
         estadisticas.put("mes", mes);
         estadisticas.put("año", year);
+        
+        List<Map<String, Object>> proximasLlegadas = todasReservas.stream()
+            .filter(r -> r.getEstado() == EstadoReserva.CONFIRMADA)
+            .filter(r-> {
+                try {
+                    return LocalDate.parse(r.getFechaEntrada()).equals(hoy);
+                } catch(Exception e) {
+                    return false;
+                }
+            })
+            .map(r -> {
+                Map<String, Object> item = new HashMap<>();
+                item.put("clienteId", r.getClienteId());
+                item.put("fechaEntrada", r.getFechaEntrada());
+                item.put("fechaSalida", r.getFechaSalida());
+                item.put("habitacionId", r.getHabitacionId());
+                item.put("hora", "15:00");
+                try {
+                    long noches = java.time.temporal.ChronoUnit.DAYS.between(
+                        LocalDate.parse(r.getFechaEntrada()),
+                        LocalDate.parse(r.getFechaSalida()));
+                    item.put("noches", noches);
+                } catch (Exception e) { item.put("noches", 0); }
+                return item;
+            })
+            .collect(Collectors.toList());
+
+
+        List<Map<String, Object>> proximasSalidas = todasReservas.stream()
+            .filter(r -> r.getEstado() == EstadoReserva.CONFIRMADA)
+            .filter(r-> {
+                try {
+                    return LocalDate.parse(r.getFechaSalida()).equals(hoy);
+                } catch(Exception e) {
+                    return false;
+                }
+            })
+            .map(r -> {
+                Map<String, Object> item = new HashMap<>();
+                item.put("clienteId", r.getClienteId());
+                item.put("fechaEntrada", r.getFechaEntrada());
+                item.put("fechaSalida", r.getFechaSalida());
+                item.put("habitacionId", r.getHabitacionId());
+                item.put("hora", "12:00");
+                try {
+                    long noches = java.time.temporal.ChronoUnit.DAYS.between(
+                        LocalDate.parse(r.getFechaEntrada()),
+                        LocalDate.parse(r.getFechaSalida()));
+                    item.put("noches", noches);
+                } catch (Exception e) { item.put("noches", 0); }
+                return item;
+            })
+            .collect(Collectors.toList());
+        estadisticas.put("proximasLlegadas", proximasLlegadas);
+        estadisticas.put("proximasSalidas", proximasSalidas);
 
         return estadisticas;
     }
